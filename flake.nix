@@ -32,6 +32,10 @@
           {
             packages = [treefmtModule.config.build.wrapper];
 
+            languages.rust = {
+              enable = true;
+            };
+
             pre-commit = {
               hooks = {
                 treefmt.enable = true;
