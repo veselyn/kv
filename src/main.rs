@@ -1,8 +1,24 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
-struct Cli {}
+struct Cli {
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(Subcommand, Debug)]
+enum Command {
+    #[command(about = "Get the value of a key")]
+    Get { key: String },
+    #[command(about = "Set the value of a key")]
+    Set { key: String, value: String },
+}
 
 fn main() {
-    let _cli = Cli::parse();
+    let cli = Cli::parse();
+
+    match cli.command {
+        Command::Get { key } => println!("getting {}", key),
+        Command::Set { key, value } => println!("setting {} to {}", key, value),
+    }
 }
