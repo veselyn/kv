@@ -30,7 +30,10 @@
         inherit inputs pkgs;
         modules = [
           {
-            packages = [treefmtModule.config.build.wrapper];
+            packages = with pkgs; [
+              treefmtModule.config.build.wrapper
+              refinery-cli
+            ];
 
             languages.rust = {
               enable = true;

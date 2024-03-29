@@ -1,6 +1,10 @@
 use anyhow::Context;
 use clap::{Parser, Subcommand};
 
+mod embedded {
+    refinery::embed_migrations!("./migrations");
+}
+
 #[derive(Parser, Debug)]
 struct Cli {
     #[command(subcommand)]
@@ -22,17 +26,9 @@ fn main() -> anyhow::Result<()> {
     let db_dir = data_dir.join("kv");
     std::fs::create_dir_all(&db_dir)?;
     let db_path = db_dir.join("db");
-    let db = rusqlite::Connection::open(db_path)?;
+    let mut db = rusqlite::Connection::open(db_path)?;
 
-    db.execute(
-        "
-        CREATE TABLE IF NOT EXISTS store (
-            key TEXT PRIMARY KEY,
-            value TEXT NOT NULL
-        )
-        ",
-        [],
-    )?;
+    embedded::migrations::runner().run(&mut db)?;
 
     match cli.command {
         Command::Get { key } => {
