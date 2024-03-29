@@ -19,11 +19,9 @@
       pkgs = import nixpkgs {inherit system;};
       treefmtModule = treefmt.lib.evalModule pkgs ./treefmt.nix;
     in {
-      checks.ci = self.devShells.${system}.default.config.ciDerivation;
       formatter = treefmtModule.config.build.wrapper;
 
       packages = {
-        devenv-up = self.devShells.${system}.default.config.procfileScript;
       };
 
       devShells.default = devenv.lib.mkShell {
