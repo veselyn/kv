@@ -22,6 +22,12 @@
       formatter = treefmtModule.config.build.wrapper;
 
       packages = {
+        default = pkgs.rustPlatform.buildRustPackage {
+          pname = "kv";
+          version = "0.1.0";
+          src = ./.;
+          cargoLock = {lockFile = ./Cargo.lock;};
+        };
       };
 
       devShells.default = devenv.lib.mkShell {
