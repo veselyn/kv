@@ -26,8 +26,8 @@ fn main() -> anyhow::Result<()> {
     let db_dir = data_dir.join("kv");
     std::fs::create_dir_all(&db_dir)?;
     let db_path = db_dir.join("db");
-    let mut db = rusqlite::Connection::open(db_path)?;
 
+    let mut db = rusqlite::Connection::open(db_path)?;
     embedded::migrations::runner().run(&mut db)?;
 
     match cli.command {
