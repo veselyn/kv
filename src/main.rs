@@ -14,11 +14,13 @@ enum Command {
     Set { key: String, value: String },
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Command::Get { key } => println!("getting {}", key),
         Command::Set { key, value } => println!("setting {} to {}", key, value),
     }
+
+    Ok(())
 }
