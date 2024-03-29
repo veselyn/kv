@@ -1,3 +1,4 @@
+use anyhow::Context;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
@@ -17,7 +18,11 @@ enum Command {
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
-    let db = rusqlite::Connection::open("./kv.db")?;
+    let data_dir = dirs::data_dir().context("getting data directory")?;
+    let db_dir = data_dir.join("kv");
+    std::fs::create_dir_all(&db_dir)?;
+    let db_path = db_dir.join("db");
+    let db = rusqlite::Connection::open(db_path)?;
 
     db.execute(
         "
