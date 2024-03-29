@@ -33,7 +33,7 @@ fn main() -> anyhow::Result<()> {
     match cli.command {
         Command::Get { key } => {
             let value: String = db.query_row(
-                "SELECT value FROM store WHERE key = :key",
+                "SELECT value FROM keys WHERE id = :key",
                 rusqlite::named_params! {
                     ":key": key
                 },
@@ -43,7 +43,7 @@ fn main() -> anyhow::Result<()> {
         }
         Command::Set { key, value } => {
             db.execute(
-                "INSERT INTO store (key, value) VALUES (:key, :value)",
+                "INSERT INTO keys (id, value) VALUES (:key, :value)",
                 rusqlite::named_params! {
                     ":key": key,
                     ":value": value

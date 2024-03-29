@@ -1,4 +1,4 @@
-         CREATE TABLE store (
-             key TEXT PRIMARY KEY,
+         CREATE TABLE keys (
+             id TEXT PRIMARY KEY,
              value TEXT NOT NULL
          )
