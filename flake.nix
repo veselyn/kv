@@ -22,6 +22,8 @@
       formatter = treefmtModule.config.build.wrapper;
 
       packages = {
+        devenv-up = self.devShells.${system}.default.config.procfileScript;
+
         default = pkgs.rustPlatform.buildRustPackage {
           pname = "kv";
           version = "0.1.0";
