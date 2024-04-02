@@ -82,3 +82,38 @@ fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+impl Default for App {
+    fn default() -> Self {
+        let mut db = rusqlite::Connection::open_in_memory().expect("opening sqlite in memory");
+
+        embedded::migrations::runner()
+            .run(&mut db)
+            .expect("migrating database");
+
+        Self { db }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn sets_and_gets_keys() -> anyhow::Result<()> {
+        let app = App::default();
+
+        assert_eq!(
+            rusqlite::Error::QueryReturnedNoRows,
+            app.get("key").unwrap_err().downcast()?
+        );
+
+        app.set("key", "value")?;
+
+        assert_eq!("value", app.get("key")?);
+
+        Ok(())
+    }
+}

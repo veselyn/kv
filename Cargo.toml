@@ -12,3 +12,6 @@ dirs = "5.0.1"
 refinery = { version = "0.8.12", features = ["rusqlite"] }
 rusqlite = { version = "0.30.0", features = ["bundled"] }
 thiserror = "1.0.58"
+
+[dev-dependencies]
+pretty_assertions = "1.4.0"
