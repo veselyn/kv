@@ -19,6 +19,44 @@ enum Command {
     Set { key: String, value: String },
 }
 
+#[derive(Debug)]
+struct App {
+    db: rusqlite::Connection,
+}
+
+impl App {
+    fn new(db: rusqlite::Connection) -> Self {
+        Self { db }
+    }
+
+    fn get<S>(&self, key: S) -> anyhow::Result<String>
+    where
+        S: Into<String>,
+    {
+        Ok(self.db.query_row(
+            "SELECT value FROM keys WHERE id = :key",
+            rusqlite::named_params! {
+                ":key": key.into()
+            },
+            |row| row.get("value"),
+        )?)
+    }
+
+    fn set<S>(&self, key: S, value: S) -> anyhow::Result<()>
+    where
+        S: Into<String>,
+    {
+        self.db.execute(
+            "INSERT INTO keys (id, value) VALUES (:key, :value)",
+            rusqlite::named_params! {
+                ":key": key.into(),
+                ":value": value.into()
+            },
+        )?;
+        Ok(())
+    }
+}
+
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
@@ -30,25 +68,15 @@ fn main() -> anyhow::Result<()> {
     let mut db = rusqlite::Connection::open(db_path)?;
     embedded::migrations::runner().run(&mut db)?;
 
+    let app = App::new(db);
+
     match cli.command {
         Command::Get { key } => {
-            let value: String = db.query_row(
-                "SELECT value FROM keys WHERE id = :key",
-                rusqlite::named_params! {
-                    ":key": key
-                },
-                |row| row.get("value"),
-            )?;
+            let value = app.get(key)?;
             println!("{}", value);
         }
         Command::Set { key, value } => {
-            db.execute(
-                "INSERT INTO keys (id, value) VALUES (:key, :value)",
-                rusqlite::named_params! {
-                    ":key": key,
-                    ":value": value
-                },
-            )?;
+            app.set(key, value)?;
         }
     }
 
