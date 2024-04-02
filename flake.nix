@@ -56,6 +56,10 @@
                 treefmt.package = treefmtModule.config.build.wrapper;
               };
             };
+
+            services = {
+              redis.enable = true;
+            };
           }
         ];
       };
