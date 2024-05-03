@@ -39,7 +39,6 @@
             packages = with pkgs; [
               treefmtModule.config.build.wrapper
               refinery-cli
-              sqlfluff
             ];
 
             languages.rust = {
