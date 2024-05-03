@@ -4,9 +4,6 @@ on:
   push:
     branches: ["**"]
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   build:
     name: Build
