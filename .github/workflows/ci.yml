@@ -21,3 +21,18 @@ jobs:
 
       - name: Build
         run: nix build
+
+  test:
+    name: Test
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: ./.github/actions/nix
+
+      - name: Test
+        run: cargo test
