@@ -58,8 +58,9 @@
         modules = [
           {
             packages = with pkgs; [
-              treefmtModule.config.build.wrapper
+              git
               refinery-cli
+              treefmtModule.config.build.wrapper
             ];
 
             languages.rust = {
