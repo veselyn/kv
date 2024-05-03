@@ -48,10 +48,8 @@
             pre-commit = {
               hooks = {
                 clippy.enable = true;
+                clippy.settings.denyWarnings = true;
                 treefmt.enable = true;
-              };
-              settings = {
-                clippy.denyWarnings = true;
                 treefmt.package = treefmtModule.config.build.wrapper;
               };
             };
