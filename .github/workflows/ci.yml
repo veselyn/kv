@@ -37,3 +37,18 @@ jobs:
 
       - name: Test
         run: cargo test
+
+  check:
+    name: Check
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: ./.github/actions/nix
+
+      - name: Clippy
+        run: cargo clippy -- -D warnings
