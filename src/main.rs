@@ -17,6 +17,8 @@ enum Command {
     Get { key: String },
     #[command(about = "Set the value of a key")]
     Set { key: String, value: String },
+    #[command(about = "Delete the key")]
+    Del { key: String },
 }
 
 #[derive(Debug)]
@@ -55,6 +57,19 @@ impl App {
         )?;
         Ok(())
     }
+
+    fn del<S>(&self, key: S) -> anyhow::Result<()>
+    where
+        S: Into<String>,
+    {
+        self.db.execute(
+            "DELETE FROM keys WHERE id = :key",
+            rusqlite::named_params! {
+                ":key": key.into()
+            },
+        )?;
+        Ok(())
+    }
 }
 
 fn main() -> anyhow::Result<()> {
@@ -77,6 +92,9 @@ fn main() -> anyhow::Result<()> {
         }
         Command::Set { key, value } => {
             app.set(key, value)?;
+        }
+        Command::Del { key } => {
+            app.del(key)?;
         }
     }
 
@@ -113,6 +131,23 @@ mod tests {
         app.set("key", "value")?;
 
         assert_eq!("value", app.get("key")?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn deletes_keys() -> anyhow::Result<()> {
+        let app = App::default();
+
+        app.set("key", "value")?;
+        app.get("key")?;
+
+        app.del("key")?;
+
+        assert_eq!(
+            rusqlite::Error::QueryReturnedNoRows,
+            app.get("key").unwrap_err().downcast()?
+        );
 
         Ok(())
     }
