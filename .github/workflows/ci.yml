@@ -16,12 +16,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Nix Flake Checker
-        uses: DeterminateSystems/flake-checker-action@v5
-      - name: Nix Installer
-        uses: DeterminateSystems/nix-installer-action@v10
-      - name: Nix Magic Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v4
+      - name: Install Nix
+        uses: ./.github/actions/nix
 
       - name: Build
         run: nix build

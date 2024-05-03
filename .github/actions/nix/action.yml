@@ -1,0 +1,11 @@
+name: Install Nix
+description: Reusable action that executes all the necessary steps to install Nix
+runs:
+  using: composite
+  steps:
+    - name: Nix Flake Checker
+      uses: DeterminateSystems/flake-checker-action@v5
+    - name: Nix Installer
+      uses: DeterminateSystems/nix-installer-action@v10
+    - name: Nix Magic Cache
+      uses: DeterminateSystems/magic-nix-cache-action@v4
