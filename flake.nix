@@ -30,6 +30,25 @@
           src = ./.;
           cargoLock = {lockFile = ./Cargo.lock;};
         };
+
+        redisjson = pkgs.rustPlatform.buildRustPackage rec {
+          pname = "redisjson";
+          version = "2.6.10";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "redisjson";
+            repo = "redisjson";
+            rev = "v${version}";
+            hash = "sha256-zWYhA0gKEUvxiq/kLb34vTVnaHu73CF8OYCWQ7NfPtM=";
+          };
+
+          cargoLock = {
+            lockFile = "${src}/Cargo.lock";
+            outputHashes = {
+              "ijson-0.1.3" = "sha256-GFNNGsXWXS3BWsYffxhAnWtPh7rboGWJ1FmSHSidNmI=";
+            };
+          };
+        };
       };
 
       devShells.default = devenv.lib.mkShell {
@@ -56,6 +75,11 @@
 
             services = {
               redis.enable = true;
+              redis.extraConfig = "loadmodule ${self.packages.${system}.redisjson}/lib/librejson.dylib";
+            };
+
+            processes = with pkgs; {
+              readme.exec = "${python3Packages.grip}/bin/grip";
             };
           }
         ];
