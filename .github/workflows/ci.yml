@@ -4,6 +4,10 @@ on:
   push:
     branches: ["**"]
 
+defaults:
+  run:
+    shell: bash -c "nix develop --impure -i -c bash -e {0}"
+
 jobs:
   build:
     name: Build
