@@ -21,10 +21,12 @@
     in {
       formatter = treefmtModule.config.build.wrapper;
 
-      packages = {
+      packages = rec {
         devenv-up = self.devShells.${system}.default.config.procfileScript;
 
-        default = pkgs.rustPlatform.buildRustPackage {
+        default = kv;
+
+        kv = pkgs.rustPlatform.buildRustPackage {
           pname = "kv";
           version = "0.1.0";
           src = ./.;
