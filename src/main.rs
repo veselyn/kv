@@ -1,14 +1,11 @@
 mod app;
 mod cli;
+mod migrations;
 
 use anyhow::Context;
 use app::App;
 use clap::Parser;
 use cli::{Cli, Command};
-
-mod embedded {
-    refinery::embed_migrations!("./migrations");
-}
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
@@ -19,7 +16,7 @@ fn main() -> anyhow::Result<()> {
     let db_path = db_dir.join("db");
 
     let mut db = rusqlite::Connection::open(db_path)?;
-    embedded::migrations::runner().run(&mut db)?;
+    migrations::run(&mut db)?;
 
     let app = App::new(db);
 

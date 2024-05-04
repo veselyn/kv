@@ -52,16 +52,13 @@ impl App {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::embedded;
     use pretty_assertions::assert_eq;
 
     impl Default for App {
         fn default() -> Self {
             let mut db = rusqlite::Connection::open_in_memory().expect("opening sqlite in memory");
 
-            embedded::migrations::runner()
-                .run(&mut db)
-                .expect("migrating database");
+            crate::migrations::run(&mut db).expect("migrating database");
 
             Self { db }
         }
