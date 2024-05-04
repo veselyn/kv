@@ -1,24 +1,11 @@
+mod cli;
+
 use anyhow::Context;
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use cli::{Cli, Command};
 
 mod embedded {
     refinery::embed_migrations!("./migrations");
-}
-
-#[derive(Parser, Debug)]
-struct Cli {
-    #[command(subcommand)]
-    command: Command,
-}
-
-#[derive(Subcommand, Debug)]
-enum Command {
-    #[command(about = "Get the value of a key")]
-    Get { key: String },
-    #[command(about = "Set the value of a key")]
-    Set { key: String, value: String },
-    #[command(about = "Delete the key")]
-    Del { key: String },
 }
 
 #[derive(Debug)]
