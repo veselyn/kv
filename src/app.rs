@@ -26,7 +26,7 @@ impl App {
         S: Into<String>,
     {
         self.db.execute(
-            "INSERT INTO keys (id, type, value) VALUES (:key, 'json', :value)",
+            "INSERT INTO keys (id, type, value) VALUES (:key, 'json', json(:value))",
             rusqlite::named_params! {
                 ":key": key.into(),
                 ":value": value.into()
@@ -73,9 +73,9 @@ mod tests {
             app.json_get("key").unwrap_err().downcast()?
         );
 
-        app.json_set("key", "value")?;
+        app.json_set("key", r#""value""#)?;
 
-        assert_eq!("value", app.json_get("key")?);
+        assert_eq!(r#""value""#, app.json_get("key")?);
 
         Ok(())
     }
@@ -84,7 +84,7 @@ mod tests {
     fn deletes_keys() -> anyhow::Result<()> {
         let app = App::default();
 
-        app.json_set("key", "value")?;
+        app.json_set("key", r#""value""#)?;
         app.json_get("key")?;
 
         app.json_del("key")?;
@@ -92,6 +92,24 @@ mod tests {
         assert_eq!(
             rusqlite::Error::QueryReturnedNoRows,
             app.json_get("key").unwrap_err().downcast()?
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn validates_json() -> anyhow::Result<()> {
+        let app = App::default();
+
+        assert_eq!(
+            rusqlite::Error::SqliteFailure(
+                rusqlite::ffi::Error {
+                    code: rusqlite::ErrorCode::Unknown,
+                    extended_code: 1,
+                },
+                Some("malformed JSON".to_string())
+            ),
+            app.json_set("key", "value").unwrap_err().downcast()?
         );
 
         Ok(())
