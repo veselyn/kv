@@ -13,7 +13,7 @@ impl App {
         S: Into<String>,
     {
         Ok(self.db.query_row(
-            "SELECT value FROM keys WHERE id = :key",
+            "SELECT value FROM keys WHERE id = :key and type = 'json'",
             rusqlite::named_params! {
                 ":key": key.into()
             },
@@ -26,7 +26,7 @@ impl App {
         S: Into<String>,
     {
         self.db.execute(
-            "INSERT INTO keys (id, value) VALUES (:key, :value)",
+            "INSERT INTO keys (id, type, value) VALUES (:key, 'json', :value)",
             rusqlite::named_params! {
                 ":key": key.into(),
                 ":value": value.into()
@@ -40,7 +40,7 @@ impl App {
         S: Into<String>,
     {
         self.db.execute(
-            "DELETE FROM keys WHERE id = :key",
+            "DELETE FROM keys WHERE id = :key AND type = 'json'",
             rusqlite::named_params! {
                 ":key": key.into()
             },
