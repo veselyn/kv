@@ -11,11 +11,17 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 pub enum Command {
-    #[command(about = "Get the value of a key")]
+    #[command(subcommand, about = "Interact with JSON keys")]
+    Json(JsonCommand),
+}
+
+#[derive(Subcommand, Debug)]
+pub enum JsonCommand {
+    #[command(about = "Get the value of a JSON key")]
     Get { key: String },
-    #[command(about = "Set the value of a key")]
+    #[command(about = "Set the value of a JSON key")]
     Set { key: String, value: String },
-    #[command(about = "Delete the key")]
+    #[command(about = "Delete the JSON key")]
     Del { key: String },
 }
 
@@ -32,16 +38,18 @@ impl Cli {
         let app = App::new(db);
 
         match self.command {
-            Command::Get { key } => {
-                let value = app.json_get(key)?;
-                println!("{}", value);
-            }
-            Command::Set { key, value } => {
-                app.json_set(key, value)?;
-            }
-            Command::Del { key } => {
-                app.json_del(key)?;
-            }
+            Command::Json(json_command) => match json_command {
+                JsonCommand::Get { key } => {
+                    let value = app.json_get(key)?;
+                    println!("{}", value);
+                }
+                JsonCommand::Set { key, value } => {
+                    app.json_set(key, value)?;
+                }
+                JsonCommand::Del { key } => {
+                    app.json_del(key)?;
+                }
+            },
         }
 
         Ok(())
