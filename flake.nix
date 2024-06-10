@@ -73,6 +73,9 @@
                 clippy.settings.denyWarnings = true;
                 treefmt.enable = true;
                 treefmt.package = treefmtModule.config.build.wrapper;
+                test.enable = true;
+                test.entry = "cargo test";
+                test.pass_filenames = false;
               };
             };
 
