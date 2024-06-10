@@ -33,14 +33,14 @@ impl Cli {
 
         match self.command {
             Command::Get { key } => {
-                let value = app.get(key)?;
+                let value = app.json_get(key)?;
                 println!("{}", value);
             }
             Command::Set { key, value } => {
-                app.set(key, value)?;
+                app.json_set(key, value)?;
             }
             Command::Del { key } => {
-                app.del(key)?;
+                app.json_del(key)?;
             }
         }
 

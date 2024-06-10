@@ -8,7 +8,7 @@ impl App {
         Self { db }
     }
 
-    pub fn get<S>(&self, key: S) -> anyhow::Result<String>
+    pub fn json_get<S>(&self, key: S) -> anyhow::Result<String>
     where
         S: Into<String>,
     {
@@ -21,7 +21,7 @@ impl App {
         )?)
     }
 
-    pub fn set<S>(&self, key: S, value: S) -> anyhow::Result<()>
+    pub fn json_set<S>(&self, key: S, value: S) -> anyhow::Result<()>
     where
         S: Into<String>,
     {
@@ -35,7 +35,7 @@ impl App {
         Ok(())
     }
 
-    pub fn del<S>(&self, key: S) -> anyhow::Result<()>
+    pub fn json_del<S>(&self, key: S) -> anyhow::Result<()>
     where
         S: Into<String>,
     {
@@ -70,12 +70,12 @@ mod tests {
 
         assert_eq!(
             rusqlite::Error::QueryReturnedNoRows,
-            app.get("key").unwrap_err().downcast()?
+            app.json_get("key").unwrap_err().downcast()?
         );
 
-        app.set("key", "value")?;
+        app.json_set("key", "value")?;
 
-        assert_eq!("value", app.get("key")?);
+        assert_eq!("value", app.json_get("key")?);
 
         Ok(())
     }
@@ -84,14 +84,14 @@ mod tests {
     fn deletes_keys() -> anyhow::Result<()> {
         let app = App::default();
 
-        app.set("key", "value")?;
-        app.get("key")?;
+        app.json_set("key", "value")?;
+        app.json_get("key")?;
 
-        app.del("key")?;
+        app.json_del("key")?;
 
         assert_eq!(
             rusqlite::Error::QueryReturnedNoRows,
-            app.get("key").unwrap_err().downcast()?
+            app.json_get("key").unwrap_err().downcast()?
         );
 
         Ok(())
