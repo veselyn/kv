@@ -1,13 +1,6 @@
-#[derive(Debug)]
-pub struct App {
-    db: rusqlite::Connection,
-}
+use crate::app::App;
 
 impl App {
-    pub fn new(db: rusqlite::Connection) -> Self {
-        Self { db }
-    }
-
     pub fn json_get<S>(&self, key: S) -> anyhow::Result<String>
     where
         S: Into<String>,
@@ -53,16 +46,6 @@ impl App {
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
-
-    impl Default for App {
-        fn default() -> Self {
-            let mut db = rusqlite::Connection::open_in_memory().expect("opening sqlite in memory");
-
-            crate::migrations::run(&mut db).expect("migrating database");
-
-            Self { db }
-        }
-    }
 
     #[test]
     fn sets_and_gets_keys() -> anyhow::Result<()> {
