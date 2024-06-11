@@ -9,7 +9,7 @@ impl App {
         S: Into<String>,
     {
         Ok(self.db.query_row(
-            "SELECT value FROM keys WHERE id = :key AND type = 'json'",
+            "SELECT json(value) as value FROM keys WHERE id = :key AND type = 'json'",
             rusqlite::named_params! {
                 ":key": key.into()
             },
