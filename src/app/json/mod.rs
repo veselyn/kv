@@ -22,7 +22,7 @@ impl App {
         S: Into<String>,
     {
         self.db.execute(
-            "INSERT INTO keys (id, type, value) VALUES (:key, 'json', json(:value))",
+            "INSERT OR REPLACE INTO keys (id, type, value) VALUES (:key, 'json', json(:value))",
             rusqlite::named_params! {
                 ":key": key.into(),
                 ":value": value.into()

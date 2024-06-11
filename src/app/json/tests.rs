@@ -18,6 +18,19 @@ fn sets_and_gets_keys() -> anyhow::Result<()> {
 }
 
 #[test]
+fn replaces_existing_key() -> anyhow::Result<()> {
+    let app = App::default();
+
+    app.json_set("key", r#""value1""#)?;
+    app.json_set("key", r#""value2""#)?;
+    app.json_set("key", r#""value3""#)?;
+
+    assert_eq!(r#""value3""#, app.json_get("key")?);
+
+    Ok(())
+}
+
+#[test]
 fn deletes_keys() -> anyhow::Result<()> {
     let app = App::default();
 
