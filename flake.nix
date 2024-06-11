@@ -18,6 +18,10 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {inherit system;};
       treefmtModule = treefmt.lib.evalModule pkgs ./treefmt.nix;
+      jqSysDeps = with pkgs; [autoconf automake libtool];
+      jqSysEnv = {
+        CPPFLAGS = "-D_REENTRANT";
+      };
     in {
       formatter = treefmtModule.config.build.wrapper;
 
@@ -26,12 +30,16 @@
 
         default = kv;
 
-        kv = pkgs.rustPlatform.buildRustPackage {
-          pname = "kv";
-          version = "0.1.0";
-          src = ./.;
-          cargoLock = {lockFile = ./Cargo.lock;};
-        };
+        kv =
+          (pkgs.rustPlatform.buildRustPackage {
+            pname = "kv";
+            version = "0.1.0";
+            src = ./.;
+            cargoLock = {lockFile = ./Cargo.lock;};
+            nativeBuildInputs = jqSysDeps;
+          })
+          .overrideAttrs
+          jqSysEnv;
 
         redisjson = pkgs.rustPlatform.buildRustPackage rec {
           pname = "redisjson";
@@ -57,11 +65,15 @@
         inherit inputs pkgs;
         modules = [
           {
-            packages = with pkgs; [
-              git
-              refinery-cli
-              treefmtModule.config.build.wrapper
-            ];
+            packages = with pkgs;
+              [
+                git
+                refinery-cli
+                treefmtModule.config.build.wrapper
+              ]
+              ++ jqSysDeps;
+
+            env = jqSysEnv;
 
             languages.rust = {
               enable = true;
