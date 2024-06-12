@@ -64,3 +64,19 @@ fn validates_json() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn formats_json() -> anyhow::Result<()> {
+    let app = App::default();
+
+    app.json_set("key", r#"{"key":"value"}"#)?;
+
+    assert_eq!(
+        r#"{
+    "key": "value"
+}"#,
+        app.json_get("key")?
+    );
+
+    Ok(())
+}
