@@ -80,3 +80,24 @@ fn formats_json() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn maintains_order() -> anyhow::Result<()> {
+    let app = App::default();
+
+    app.json_set(
+        "key",
+        r#"{"z_key":"value","A_key":"value","a_key":"value"}"#,
+    )?;
+
+    assert_eq!(
+        r#"{
+    "z_key": "value",
+    "A_key": "value",
+    "a_key": "value"
+}"#,
+        app.json_get("key")?
+    );
+
+    Ok(())
+}
