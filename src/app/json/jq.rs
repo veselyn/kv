@@ -10,7 +10,7 @@ where
 
     let mut formatted = String::with_capacity(input.len());
 
-    let temp_file = tempfile::NamedTempFile::new()?;
+    let mut temp_file = tempfile::NamedTempFile::new()?;
     let temp_path = temp_file
         .path()
         .to_str()
@@ -36,7 +36,6 @@ where
         anyhow::ensure!(status == 0);
     };
 
-    let mut temp_file = std::fs::File::open(temp_path)?;
     temp_file.read_to_string(&mut formatted)?;
 
     Ok(formatted)
