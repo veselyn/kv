@@ -1,42 +1,33 @@
-use std::io::Read;
-
-use anyhow::Context;
-
 pub fn format<S>(input: S) -> anyhow::Result<String>
 where
     S: Into<String>,
 {
     let input: String = input.into();
 
-    let mut formatted = String::with_capacity(input.len());
-
-    let mut temp_file = tempfile::NamedTempFile::new()?;
-    let temp_path = temp_file
-        .path()
-        .to_str()
-        .context("Path is not valid unicode")?;
-
-    unsafe {
+    let formatted = unsafe {
         let jv = jq_sys::jv_parse(std::ffi::CString::new(input)?.as_ptr());
 
-        let c_temp_file = libc::fopen(
-            std::ffi::CString::new(temp_path)?.as_ptr(),
-            std::ffi::CString::new("w")?.as_ptr(),
+        let mut buffer: *mut libc::c_char = std::ptr::null_mut();
+        let mut size: libc::size_t = 0;
+
+        let memstream = libc::open_memstream(
+            std::ptr::from_mut(&mut buffer),
+            std::ptr::from_mut(&mut size),
         );
-        anyhow::ensure!(!c_temp_file.is_null());
+        anyhow::ensure!(!memstream.is_null());
 
         jq_sys::jv_dumpf(
             jv,
-            c_temp_file as *mut jq_sys::FILE,
+            memstream as *mut jq_sys::FILE,
             (jq_sys::jv_print_flags_JV_PRINT_PRETTY | jq_sys::jv_print_flags_JV_PRINT_SPACE2)
                 .try_into()?,
         );
 
-        let status = libc::fclose(c_temp_file);
+        let status = libc::fclose(memstream);
         anyhow::ensure!(status == 0);
-    };
 
-    temp_file.read_to_string(&mut formatted)?;
+        std::ffi::CStr::from_ptr(buffer).to_str()?.to_string()
+    };
 
     Ok(formatted)
 }
