@@ -17,9 +17,12 @@
   } @ inputs:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {inherit system;};
+      inherit (pkgs) lib;
+
       treefmtModule = treefmt.lib.evalModule pkgs ./treefmt.nix;
+
       jqSysDeps = with pkgs; [autoconf automake libtool];
-      jqSysEnv = {
+      jqSysEnv = lib.optionalAttrs pkgs.stdenv.isDarwin {
         CPPFLAGS = "-D_REENTRANT";
       };
     in {
