@@ -26,7 +26,11 @@ where
         let status = libc::fclose(memstream);
         anyhow::ensure!(status == 0);
 
-        std::ffi::CStr::from_ptr(buffer).to_str()?.to_string()
+        let formatted = std::ffi::CStr::from_ptr(buffer).to_str()?.to_string();
+
+        libc::free(buffer as *mut libc::c_void);
+
+        formatted
     };
 
     Ok(formatted)
