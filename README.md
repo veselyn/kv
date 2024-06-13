@@ -8,30 +8,30 @@ JSON data type as provided by
 
 ## Command status
 
-| Command           | Basic support |
-| ----------------- | ------------- |
-| JSON.ARRAPPEND    | ❌            |
-| JSON.ARRINDEX     | ❌            |
-| JSON.ARRINSERT    | ❌            |
-| JSON.ARRLEN       | ❌            |
-| JSON.ARRPOP       | ❌            |
-| JSON.ARRTRIM      | ❌            |
-| JSON.CLEAR        | ❌            |
-| JSON.DEBUG        | ❌            |
-| JSON.DEBUG MEMORY | ❌            |
-| JSON.DEL          | ❌            |
-| JSON.FORGET       | ❌            |
-| JSON.GET          | ❌            |
-| JSON.MERGE        | ❌            |
-| JSON.MGET         | ❌            |
-| JSON.MSET         | ❌            |
-| JSON.NUMINCRBY    | ❌            |
-| JSON.NUMMULTBY    | ❌            |
-| JSON.OBJKEYS      | ❌            |
-| JSON.OBJLEN       | ❌            |
-| JSON.RESP         | ❌            |
-| JSON.SET          | ❌            |
-| JSON.STRAPPEND    | ❌            |
-| JSON.STRLEN       | ❌            |
-| JSON.TOGGLE       | ❌            |
-| JSON.TYPE         | ❌            |
+| Command           | Basic implementation |
+| ----------------- | :------------------: |
+| JSON.ARRAPPEND    |          ❌          |
+| JSON.ARRINDEX     |          ❌          |
+| JSON.ARRINSERT    |          ❌          |
+| JSON.ARRLEN       |          ❌          |
+| JSON.ARRPOP       |          ❌          |
+| JSON.ARRTRIM      |          ❌          |
+| JSON.CLEAR        |          ❌          |
+| JSON.DEBUG        |          ❌          |
+| JSON.DEBUG MEMORY |          ❌          |
+| JSON.DEL          |          ❌          |
+| JSON.FORGET       |          ❌          |
+| JSON.GET          |          ❌          |
+| JSON.MERGE        |          ❌          |
+| JSON.MGET         |          ❌          |
+| JSON.MSET         |          ❌          |
+| JSON.NUMINCRBY    |          ❌          |
+| JSON.NUMMULTBY    |          ❌          |
+| JSON.OBJKEYS      |          ❌          |
+| JSON.OBJLEN       |          ❌          |
+| JSON.RESP         |          ❌          |
+| JSON.SET          |          ❌          |
+| JSON.STRAPPEND    |          ❌          |
+| JSON.STRLEN       |          ❌          |
+| JSON.TOGGLE       |          ❌          |
+| JSON.TYPE         |          ❌          |
