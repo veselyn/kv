@@ -2,10 +2,10 @@ pub fn format<S>(input: S) -> anyhow::Result<String>
 where
     S: Into<String>,
 {
-    let input: String = input.into();
+    let c_input = std::ffi::CString::new(input.into())?;
 
     let formatted = unsafe {
-        let jv = jq_sys::jv_parse(std::ffi::CString::new(input)?.as_ptr());
+        let jv = jq_sys::jv_parse(c_input.as_ptr());
 
         let mut buffer: *mut libc::c_char = std::ptr::null_mut();
         let mut size: libc::size_t = 0;
