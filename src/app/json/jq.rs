@@ -17,6 +17,8 @@ where
         );
     };
 
+    memstream.flush();
+
     let c_output = unsafe { std::ffi::CStr::from_ptr(memstream.buffer) };
     let output = c_output.to_str().map(|str| str.to_string());
 
@@ -52,6 +54,12 @@ impl Memstream {
             file,
             closed: false,
         })
+    }
+
+    fn flush(&self) {
+        unsafe {
+            libc::fflush(self.file);
+        };
     }
 
     fn close(&mut self) -> anyhow::Result<()> {
