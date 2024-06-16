@@ -27,6 +27,8 @@ pub enum JsonCommand {
 
 impl Cli {
     pub fn run(self) -> anyhow::Result<()> {
+        env_logger::init();
+
         let data_dir = dirs::data_dir().context("getting data directory")?;
         let db_dir = data_dir.join("kv");
         std::fs::create_dir_all(&db_dir)?;
