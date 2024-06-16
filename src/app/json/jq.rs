@@ -5,24 +5,29 @@ where
     let c_input = std::ffi::CString::new(input.into())?;
 
     let mut memstream = Memstream::open()?;
+    log::trace!(memstream:?; "opened memstream");
 
     unsafe {
         let jv = jq_sys::jv_parse(c_input.as_ptr());
 
+        log::trace!(memstream:?; "dumping jv to memstream");
         jq_sys::jv_dumpf(
             jv,
             memstream.file as *mut jq_sys::FILE,
             (jq_sys::jv_print_flags_JV_PRINT_PRETTY | jq_sys::jv_print_flags_JV_PRINT_SPACE2)
                 as i32,
         );
+        log::trace!(memstream:?; "dumped jv to memstream");
     };
 
     memstream.flush();
+    log::trace!(memstream:?; "flushed memstream");
 
     let c_output = unsafe { std::ffi::CStr::from_ptr(memstream.buffer) };
     let output = c_output.to_str().map(|str| str.to_string());
 
     memstream.close()?;
+    log::trace!(memstream:?; "closed memstream");
 
     Ok(output?)
 }
