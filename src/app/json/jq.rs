@@ -34,23 +34,18 @@ where
 
 #[derive(Debug)]
 struct Memstream {
-    buffer: *mut libc::c_char,
-    _size: libc::size_t,
+    buffer: *mut i8,
+    _size: usize,
     file: *mut libc::FILE,
     closed: bool,
 }
 
 impl Memstream {
     fn open() -> anyhow::Result<Self> {
-        let mut buffer: *mut libc::c_char = std::ptr::null_mut();
-        let mut size: libc::size_t = 0;
+        let mut buffer = std::ptr::null_mut();
+        let mut size = 0;
 
-        let file = unsafe {
-            libc::open_memstream(
-                std::ptr::from_mut(&mut buffer),
-                std::ptr::from_mut(&mut size),
-            )
-        };
+        let file = unsafe { libc::open_memstream(&mut buffer, &mut size) };
         anyhow::ensure!(!file.is_null());
 
         Ok(Self {
