@@ -35,25 +35,25 @@ where
 #[derive(Debug)]
 struct Memstream {
     buffer: *mut i8,
-    _size: usize,
+    size: usize,
     file: *mut libc::FILE,
     closed: bool,
 }
 
 impl Memstream {
     fn open() -> anyhow::Result<Self> {
-        let mut buffer = std::ptr::null_mut();
-        let mut size = 0;
-
-        let file = unsafe { libc::open_memstream(&mut buffer, &mut size) };
-        anyhow::ensure!(!file.is_null());
-
-        Ok(Self {
-            buffer,
-            _size: size,
-            file,
+        let mut memstream = Self {
+            buffer: std::ptr::null_mut(),
+            size: 0,
+            file: std::ptr::null_mut(),
             closed: false,
-        })
+        };
+
+        let file = unsafe { libc::open_memstream(&mut memstream.buffer, &mut memstream.size) };
+        anyhow::ensure!(!file.is_null());
+        memstream.file = file;
+
+        Ok(memstream)
     }
 
     fn flush(&self) {
