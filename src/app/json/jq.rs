@@ -34,8 +34,8 @@ where
 
 #[derive(Debug)]
 struct Memstream {
-    buffer: *mut *mut i8,
-    size: *mut usize,
+    buffer: *mut *mut libc::c_char,
+    size: *mut libc::size_t,
     file: *mut libc::FILE,
     closed: bool,
 }
