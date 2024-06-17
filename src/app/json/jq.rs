@@ -23,7 +23,7 @@ where
     memstream.flush();
     log::trace!(memstream:?; "flushed memstream");
 
-    let c_output = unsafe { std::ffi::CStr::from_ptr(memstream.buffer) };
+    let c_output = unsafe { std::ffi::CStr::from_ptr(*memstream.buffer) };
     let output = c_output.to_str().map(|str| str.to_string());
 
     memstream.close()?;
@@ -34,8 +34,8 @@ where
 
 #[derive(Debug)]
 struct Memstream {
-    buffer: *mut i8,
-    size: usize,
+    buffer: *mut *mut i8,
+    size: *mut usize,
     file: *mut libc::FILE,
     closed: bool,
 }
@@ -43,13 +43,13 @@ struct Memstream {
 impl Memstream {
     fn open() -> anyhow::Result<Self> {
         let mut memstream = Self {
-            buffer: std::ptr::null_mut(),
-            size: 0,
+            buffer: Box::into_raw(Box::new(std::ptr::null_mut())),
+            size: Box::into_raw(Box::new(0)),
             file: std::ptr::null_mut(),
             closed: false,
         };
 
-        let file = unsafe { libc::open_memstream(&mut memstream.buffer, &mut memstream.size) };
+        let file = unsafe { libc::open_memstream(memstream.buffer, memstream.size) };
         anyhow::ensure!(!file.is_null());
         memstream.file = file;
 
