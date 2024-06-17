@@ -51,4 +51,4 @@ jobs:
         uses: ./.github/actions/nix
 
       - name: Clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings
