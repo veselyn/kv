@@ -68,9 +68,17 @@ impl Memstream {
         }
 
         let status = unsafe { libc::fclose(self.file) };
-        unsafe { libc::free(self.buffer as *mut libc::c_void) }
+        unsafe { libc::free(*self.buffer as *mut libc::c_void) }
 
         anyhow::ensure!(!status.is_positive());
+
+        unsafe {
+            drop(Box::from_raw(self.buffer));
+            drop(Box::from_raw(self.size));
+        };
+        self.buffer = std::ptr::null_mut();
+        self.size = std::ptr::null_mut();
+        self.file = std::ptr::null_mut();
 
         self.closed = true;
 
