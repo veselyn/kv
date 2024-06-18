@@ -10,7 +10,7 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(Key::Table)
-                    .col(ColumnDef::new(Key::Id).text().primary_key())
+                    .col(ColumnDef::new(Key::Id).text().not_null().primary_key())
                     .col(
                         ColumnDef::new(Key::Type)
                             .text()
