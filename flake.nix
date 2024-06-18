@@ -25,6 +25,13 @@
       jqSysEnv = lib.optionalAttrs pkgs.stdenv.isDarwin {
         CPPFLAGS = "-D_REENTRANT";
       };
+
+      tlsDeps = with pkgs;
+        lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security
+        ++ lib.optional stdenv.isLinux openssl;
+
+      buildDeps = with pkgs; [pkg-config] ++ jqSysDeps;
+      runtimeDeps = tlsDeps;
     in {
       formatter = treefmtModule.config.build.wrapper;
 
@@ -39,7 +46,8 @@
             version = "0.1.0";
             src = ./.;
             cargoLock = {lockFile = ./Cargo.lock;};
-            nativeBuildInputs = jqSysDeps;
+            nativeBuildInputs = buildDeps;
+            buildInputs = runtimeDeps;
           })
           .overrideAttrs
           jqSysEnv;
@@ -71,10 +79,11 @@
             packages = with pkgs;
               [
                 git
-                refinery-cli
+                sea-orm-cli
                 treefmtModule.config.build.wrapper
               ]
-              ++ jqSysDeps;
+              ++ buildDeps
+              ++ runtimeDeps;
 
             env = jqSysEnv;
 

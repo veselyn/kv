@@ -13,6 +13,7 @@ jobs:
     name: Build
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
 
@@ -32,6 +33,7 @@ jobs:
     name: Test
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
 

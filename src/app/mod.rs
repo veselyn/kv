@@ -1,12 +1,14 @@
+use sea_orm::*;
+
 mod json;
 
 #[derive(Debug)]
 pub struct App {
-    db: rusqlite::Connection,
+    db: DatabaseConnection,
 }
 
 impl App {
-    pub fn new(db: rusqlite::Connection) -> Self {
+    pub fn new(db: DatabaseConnection) -> Self {
         Self { db }
     }
 }
@@ -14,9 +16,17 @@ impl App {
 #[cfg(test)]
 impl Default for App {
     fn default() -> Self {
-        let mut db = rusqlite::Connection::open_in_memory().expect("opening sqlite in memory");
+        let db = async_std::task::block_on(async {
+            let db = crate::database::new("sqlite::memory:")
+                .await
+                .expect("opening sqlite in memory");
 
-        crate::migrations::run(&mut db).expect("migrating database");
+            crate::migrations::run(&db)
+                .await
+                .expect("migrating database");
+
+            db
+        });
 
         Self { db }
     }
