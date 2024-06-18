@@ -26,9 +26,11 @@
         CPPFLAGS = "-D_REENTRANT";
       };
 
-      tlsDeps = with pkgs; lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
+      tlsDeps = with pkgs;
+        lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security
+        ++ lib.optional stdenv.isLinux openssl;
 
-      buildDeps = jqSysDeps;
+      buildDeps = with pkgs; [pkg-config] ++ jqSysDeps;
       runtimeDeps = tlsDeps;
     in {
       formatter = treefmtModule.config.build.wrapper;
