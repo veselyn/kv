@@ -26,7 +26,10 @@
         CPPFLAGS = "-D_REENTRANT";
       };
 
-      buildDeps = with pkgs; jqSysDeps;
+      tlsDeps = with pkgs; lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
+
+      buildDeps = jqSysDeps;
+      runtimeDeps = tlsDeps;
     in {
       formatter = treefmtModule.config.build.wrapper;
 
@@ -42,6 +45,7 @@
             src = ./.;
             cargoLock = {lockFile = ./Cargo.lock;};
             nativeBuildInputs = buildDeps;
+            buildInputs = runtimeDeps;
           })
           .overrideAttrs
           jqSysEnv;
