@@ -82,7 +82,8 @@
                 sea-orm-cli
                 treefmtModule.config.build.wrapper
               ]
-              ++ buildDeps;
+              ++ buildDeps
+              ++ runtimeDeps;
 
             env = jqSysEnv;
 
