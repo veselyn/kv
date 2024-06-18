@@ -39,7 +39,7 @@ impl Cli {
             .append(true)
             .open(&db_path)
             .expect("yes");
-        let db_url = format!("sqlite:///{}", db_path.display());
+        let db_url = format!("sqlite://{}", db_path.display());
 
         let db = database::new(db_url).await?;
         migrations::run(&db).await?;
