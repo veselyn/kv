@@ -1,12 +1,14 @@
+use sea_orm::*;
+
 mod json;
 
 #[derive(Debug)]
 pub struct App {
-    db: sea_orm::DatabaseConnection,
+    db: DatabaseConnection,
 }
 
 impl App {
-    pub fn new(db: sea_orm::DatabaseConnection) -> Self {
+    pub fn new(db: DatabaseConnection) -> Self {
         Self { db }
     }
 }

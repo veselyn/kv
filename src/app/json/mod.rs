@@ -2,7 +2,7 @@ mod jq;
 #[cfg(test)]
 mod tests;
 
-use sea_orm::ConnectionTrait;
+use sea_orm::*;
 
 use crate::app::App;
 
@@ -15,8 +15,8 @@ impl App {
 
         let result = self
             .db
-            .query_one(sea_orm::Statement::from_sql_and_values(
-                sea_orm::DatabaseBackend::Sqlite,
+            .query_one(Statement::from_sql_and_values(
+                DatabaseBackend::Sqlite,
                 "SELECT json(value) as value FROM key WHERE id = $1 AND type = 'json'",
                 [key.into()],
             ))
@@ -41,8 +41,8 @@ impl App {
         let value = value.into();
 
         self.db
-            .execute(sea_orm::Statement::from_sql_and_values(
-                sea_orm::DatabaseBackend::Sqlite,
+            .execute(Statement::from_sql_and_values(
+                DatabaseBackend::Sqlite,
                 "INSERT OR REPLACE INTO key (id, type, value) VALUES ($1, 'json', json($2))",
                 [key.into(), value.into()],
             ))
@@ -58,8 +58,8 @@ impl App {
         let key = key.into();
 
         self.db
-            .execute(sea_orm::Statement::from_sql_and_values(
-                sea_orm::DatabaseBackend::Sqlite,
+            .execute(Statement::from_sql_and_values(
+                DatabaseBackend::Sqlite,
                 "DELETE FROM key WHERE id = $1 AND type = 'json'",
                 [key.into()],
             ))

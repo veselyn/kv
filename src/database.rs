@@ -1,6 +1,8 @@
-pub async fn new<C>(options: C) -> anyhow::Result<sea_orm::DatabaseConnection>
+use sea_orm::*;
+
+pub async fn new<C>(options: C) -> anyhow::Result<DatabaseConnection>
 where
-    C: Into<sea_orm::ConnectOptions>,
+    C: Into<ConnectOptions>,
 {
-    Ok(sea_orm::Database::connect(options).await?)
+    Ok(Database::connect(options).await?)
 }
