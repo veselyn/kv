@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+migration = { path = "./migration" }
 anyhow = "1.0.81"
 async-std = { version = "1.12.0", features = ["attributes"] }
 clap = { version = "4.5.4", features = ["derive"] }
@@ -14,10 +15,11 @@ env_logger = { version = "0.11.3", features = ["unstable-kv"] }
 jq-sys = { version = "0.2.2", features = ["bundled"] }
 libc = "0.2.155"
 log = { version = "0.4.21", features = ["kv", "kv_std"] }
-refinery = { version = "0.8.12", features = ["rusqlite"] }
 rusqlite = { version = "0.30.0", features = ["bundled"] }
 tempfile = "3.10.1"
 thiserror = "1.0.58"
+sea-orm = { version = "0.12.15", features = ["sqlx-sqlite", "runtime-async-std-native-tls", "sea-orm-internal"] }
+sea-query = { version = "0.30.7", default-features = false, features = ["sea-query-derive", "derive", "backend-sqlite"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"

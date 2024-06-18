@@ -1,10 +1,9 @@
-pub type Migratable = rusqlite::Connection;
+use migration::MigratorTrait;
 
-pub fn run(connection: &mut Migratable) -> anyhow::Result<()> {
-    refinery::migrations::runner().run(connection)?;
+pub async fn run<'c, C>(database: C) -> anyhow::Result<()>
+where
+    C: migration::IntoSchemaManagerConnection<'c>,
+{
+    migration::Migrator::up(database, None).await?;
     Ok(())
-}
-
-mod refinery {
-    refinery::embed_migrations!("./migrations");
 }

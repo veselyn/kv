@@ -71,7 +71,7 @@
             packages = with pkgs;
               [
                 git
-                refinery-cli
+                sea-orm-cli
                 treefmtModule.config.build.wrapper
               ]
               ++ jqSysDeps;
