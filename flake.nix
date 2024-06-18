@@ -25,6 +25,8 @@
       jqSysEnv = lib.optionalAttrs pkgs.stdenv.isDarwin {
         CPPFLAGS = "-D_REENTRANT";
       };
+
+      tlsDeps = lib.optional pkgs.stdenv.isLinux pkgs.openssl;
     in {
       formatter = treefmtModule.config.build.wrapper;
 
@@ -39,7 +41,7 @@
             version = "0.1.0";
             src = ./.;
             cargoLock = {lockFile = ./Cargo.lock;};
-            nativeBuildInputs = jqSysDeps;
+            nativeBuildInputs = jqSysDeps ++ tlsDeps;
           })
           .overrideAttrs
           jqSysEnv;
@@ -74,7 +76,8 @@
                 sea-orm-cli
                 treefmtModule.config.build.wrapper
               ]
-              ++ jqSysDeps;
+              ++ jqSysDeps
+              ++ tlsDeps;
 
             env = jqSysEnv;
 
