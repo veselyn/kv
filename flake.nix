@@ -27,6 +27,8 @@
       };
 
       tlsDeps = lib.optional pkgs.stdenv.isLinux pkgs.openssl;
+
+      buildDeps = jqSysDeps ++ tlsDeps;
     in {
       formatter = treefmtModule.config.build.wrapper;
 
@@ -41,7 +43,7 @@
             version = "0.1.0";
             src = ./.;
             cargoLock = {lockFile = ./Cargo.lock;};
-            nativeBuildInputs = jqSysDeps ++ tlsDeps;
+            nativeBuildInputs = buildDeps;
           })
           .overrideAttrs
           jqSysEnv;
@@ -76,8 +78,7 @@
                 sea-orm-cli
                 treefmtModule.config.build.wrapper
               ]
-              ++ jqSysDeps
-              ++ tlsDeps;
+              ++ buildDeps;
 
             env = jqSysEnv;
 
