@@ -2,8 +2,8 @@ mod jq;
 #[cfg(test)]
 mod tests;
 
-use ::entity::key;
-use sea_orm::*;
+use entity::key;
+use sea_orm::prelude::*;
 use sea_query::*;
 
 use crate::app::App;
