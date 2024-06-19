@@ -63,3 +63,21 @@ jobs:
 
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
+
+  generate:
+    name: Generate
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: ./.github/actions/nix
+
+      - name: Generate Entities
+        run: cargo run --package entity
+
+      - name: Verify
+        run: test -z "$(git status --porcelain)"

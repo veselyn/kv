@@ -30,8 +30,10 @@
         lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security
         ++ lib.optional stdenv.isLinux openssl;
 
+      entityDeps = with pkgs; lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.SystemConfiguration;
+
       buildDeps = with pkgs; [pkg-config] ++ jqSysDeps;
-      runtimeDeps = tlsDeps;
+      runtimeDeps = tlsDeps ++ entityDeps;
     in {
       formatter = treefmtModule.config.build.wrapper;
 

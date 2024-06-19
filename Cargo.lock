@@ -750,6 +750,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "entity"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "sea-orm",
+ "sea-orm-cli",
+ "tempfile",
+]
+
+[[package]]
 name = "env_filter"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1280,6 +1291,7 @@ dependencies = [
  "async-std",
  "clap",
  "dirs",
+ "entity",
  "env_logger",
  "jq-sys",
  "libc",
@@ -2143,15 +2155,32 @@ version = "0.12.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "620bc560062ae251b1366bde43b3f1508445cab5c2c8cbdb397034638ab1b357"
 dependencies = [
+ "async-std",
  "chrono",
  "clap",
  "dotenvy",
  "glob",
  "regex",
+ "sea-orm-codegen",
  "sea-schema",
+ "sqlx",
  "tracing",
  "tracing-subscriber",
  "url",
+]
+
+[[package]]
+name = "sea-orm-codegen"
+version = "0.12.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6edc65d76c9a0d693611b8dafac12802406a426410f95beb63ae1ce69354a703"
+dependencies = [
+ "heck 0.4.1",
+ "proc-macro2",
+ "quote",
+ "sea-query",
+ "syn 2.0.66",
+ "tracing",
 ]
 
 [[package]]
@@ -2240,7 +2269,9 @@ checksum = "30d148608012d25222442d1ebbfafd1228dbc5221baf4ec35596494e27a2394e"
 dependencies = [
  "futures",
  "sea-query",
+ "sea-query-binder",
  "sea-schema-derive",
+ "sqlx",
 ]
 
 [[package]]
