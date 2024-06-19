@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.86"
 async-std = "1.12.0"
-sea-orm = "0.12.15"
+sea-orm = { version = "0.12.15", features = ["sqlx-sqlite", "runtime-async-std-native-tls"] }
 sea-orm-cli = "0.12.15"
 tempfile = "3.10.1"
