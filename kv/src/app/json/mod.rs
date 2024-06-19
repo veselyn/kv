@@ -72,12 +72,14 @@ impl App {
     {
         let key = key.into();
 
+        let delete_statement = Query::delete()
+            .from_table(key::Entity)
+            .and_where(key::Column::Type.eq("json"))
+            .and_where(key::Column::Id.eq(key))
+            .to_owned();
+
         self.db
-            .execute(Statement::from_sql_and_values(
-                DatabaseBackend::Sqlite,
-                "DELETE FROM key WHERE id = $1 AND type = 'json'",
-                [key.into()],
-            ))
+            .execute(self.db.get_database_backend().build(&delete_statement))
             .await?;
 
         Ok(())
