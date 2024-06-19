@@ -2,7 +2,9 @@ mod jq;
 #[cfg(test)]
 mod tests;
 
+use ::entity::key;
 use sea_orm::*;
+use sea_query::*;
 
 use crate::app::App;
 
@@ -13,13 +15,19 @@ impl App {
     {
         let key = key.into();
 
+        let select_statement = Query::select()
+            .expr_as(
+                Expr::cust_with_expr("JSON(?)", Expr::col(key::Column::Value)),
+                key::Column::Value,
+            )
+            .from(key::Entity)
+            .and_where(key::Column::Type.eq("json"))
+            .and_where(key::Column::Id.eq(key))
+            .to_owned();
+
         let result = self
             .db
-            .query_one(Statement::from_sql_and_values(
-                DatabaseBackend::Sqlite,
-                "SELECT json(value) as value FROM key WHERE id = $1 AND type = 'json'",
-                [key.into()],
-            ))
+            .query_one(self.db.get_database_backend().build(&select_statement))
             .await?;
 
         let Some(result) = result else {
