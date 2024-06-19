@@ -50,7 +50,7 @@
             src = ./.;
             cargoLock = {lockFile = ./Cargo.lock;};
 
-            cargoBuildsFlags = ["--package" "kv"];
+            cargoBuildFlags = ["--package" "kv"];
 
             nativeBuildInputs = buildDeps;
             buildInputs = runtimeDeps;
