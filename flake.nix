@@ -44,8 +44,12 @@
           (pkgs.rustPlatform.buildRustPackage {
             pname = "kv";
             version = "0.1.0";
+
             src = ./.;
             cargoLock = {lockFile = ./Cargo.lock;};
+
+            cargoBuildsFlags = ["--package" "kv"];
+
             nativeBuildInputs = buildDeps;
             buildInputs = runtimeDeps;
           })
