@@ -48,12 +48,19 @@ impl App {
         let key = key.into();
         let value = value.into();
 
+        let insert_statement = Query::insert()
+            .replace()
+            .into_table(key::Entity)
+            .columns([key::Column::Id, key::Column::Type, key::Column::Value])
+            .values([
+                key.into(),
+                "json".into(),
+                Expr::cust_with_expr("JSON(?)", value),
+            ])?
+            .to_owned();
+
         self.db
-            .execute(Statement::from_sql_and_values(
-                DatabaseBackend::Sqlite,
-                "INSERT OR REPLACE INTO key (id, type, value) VALUES ($1, 'json', json($2))",
-                [key.into(), value.into()],
-            ))
+            .execute(self.db.get_database_backend().build(&insert_statement))
             .await?;
 
         Ok(())
