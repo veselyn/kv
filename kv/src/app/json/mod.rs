@@ -2,7 +2,9 @@ mod jq;
 #[cfg(test)]
 mod tests;
 
-use sea_orm::*;
+use entity::key;
+use sea_orm::prelude::*;
+use sea_query::*;
 
 use crate::app::App;
 
@@ -13,13 +15,19 @@ impl App {
     {
         let key = key.into();
 
+        let select_statement = Query::select()
+            .expr_as(
+                Expr::cust_with_expr("JSON(?)", Expr::col(key::Column::Value)),
+                key::Column::Value,
+            )
+            .from(key::Entity)
+            .and_where(key::Column::Type.eq("json"))
+            .and_where(key::Column::Id.eq(key))
+            .to_owned();
+
         let result = self
             .db
-            .query_one(Statement::from_sql_and_values(
-                DatabaseBackend::Sqlite,
-                "SELECT json(value) as value FROM key WHERE id = $1 AND type = 'json'",
-                [key.into()],
-            ))
+            .query_one(self.db.get_database_backend().build(&select_statement))
             .await?;
 
         let Some(result) = result else {
@@ -40,12 +48,19 @@ impl App {
         let key = key.into();
         let value = value.into();
 
+        let insert_statement = Query::insert()
+            .replace()
+            .into_table(key::Entity)
+            .columns([key::Column::Id, key::Column::Type, key::Column::Value])
+            .values([
+                key.into(),
+                "json".into(),
+                Expr::cust_with_expr("JSON(?)", value),
+            ])?
+            .to_owned();
+
         self.db
-            .execute(Statement::from_sql_and_values(
-                DatabaseBackend::Sqlite,
-                "INSERT OR REPLACE INTO key (id, type, value) VALUES ($1, 'json', json($2))",
-                [key.into(), value.into()],
-            ))
+            .execute(self.db.get_database_backend().build(&insert_statement))
             .await?;
 
         Ok(())
@@ -57,12 +72,14 @@ impl App {
     {
         let key = key.into();
 
+        let delete_statement = Query::delete()
+            .from_table(key::Entity)
+            .and_where(key::Column::Type.eq("json"))
+            .and_where(key::Column::Id.eq(key))
+            .to_owned();
+
         self.db
-            .execute(Statement::from_sql_and_values(
-                DatabaseBackend::Sqlite,
-                "DELETE FROM key WHERE id = $1 AND type = 'json'",
-                [key.into()],
-            ))
+            .execute(self.db.get_database_backend().build(&delete_statement))
             .await?;
 
         Ok(())
