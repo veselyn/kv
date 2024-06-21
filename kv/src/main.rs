@@ -1,7 +1,6 @@
 mod app;
 mod cli;
 mod database;
-mod migrations;
 
 use clap::Parser;
 use cli::Cli;

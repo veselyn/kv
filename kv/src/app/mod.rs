@@ -1,7 +1,6 @@
+use crate::database::Database;
 use anyhow::Context;
 use sea_orm::*;
-
-use crate::{database, migrations};
 
 mod json;
 
@@ -26,8 +25,8 @@ impl App {
             .expect("yes");
         let db_url = format!("sqlite://{}", db_path.display());
 
-        let db = database::new(db_url).await?;
-        migrations::run(&db).await?;
+        let db = Database::connect(db_url).await?;
+        Database::migrate(&db).await?;
 
         Ok(Self { db })
     }
@@ -37,13 +36,11 @@ impl App {
 impl Default for App {
     fn default() -> Self {
         let db = async_std::task::block_on(async {
-            let db = crate::database::new("sqlite::memory:")
+            let db = Database::connect("sqlite::memory:")
                 .await
                 .expect("opening sqlite in memory");
 
-            crate::migrations::run(&db)
-                .await
-                .expect("migrating database");
+            Database::migrate(&db).await.expect("migrating database");
 
             db
         });
