@@ -1,4 +1,4 @@
-mod jq;
+mod format;
 #[cfg(test)]
 mod tests;
 
@@ -7,6 +7,8 @@ use sea_orm::prelude::*;
 use sea_query::*;
 
 use crate::app::App;
+
+use self::format::format;
 
 impl App {
     pub async fn json_get<S>(&self, key: S) -> anyhow::Result<String>
@@ -36,7 +38,7 @@ impl App {
 
         let value: String = result.try_get("", "value")?;
 
-        let formatted = jq::format(value)?;
+        let formatted = format(value)?;
 
         Ok(formatted)
     }
