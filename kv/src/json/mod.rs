@@ -1,8 +1,8 @@
 mod format;
 mod repository;
 
-use self::format::format;
-pub use self::repository::*;
+use format::format;
+pub use repository::Repository;
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]

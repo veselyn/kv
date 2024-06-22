@@ -1,6 +1,6 @@
 mod error;
 
-use self::error::*;
+use error::*;
 use migration::MigratorTrait;
 use sea_orm::{ConnectOptions, DatabaseConnection};
 
