@@ -17,7 +17,7 @@ impl Service {
         Self { repository }
     }
 
-    pub async fn json_get<S>(&self, key: S) -> anyhow::Result<String>
+    pub async fn get<S>(&self, key: S) -> anyhow::Result<String>
     where
         S: Into<String>,
     {
@@ -28,7 +28,7 @@ impl Service {
         Ok(formatted)
     }
 
-    pub async fn json_set<S>(&self, key: S, value: S) -> anyhow::Result<()>
+    pub async fn set<S>(&self, key: S, value: S) -> anyhow::Result<()>
     where
         S: Into<String>,
     {
@@ -37,7 +37,7 @@ impl Service {
         Ok(())
     }
 
-    pub async fn json_del<S>(&self, key: S) -> anyhow::Result<()>
+    pub async fn del<S>(&self, key: S) -> anyhow::Result<()>
     where
         S: Into<String>,
     {

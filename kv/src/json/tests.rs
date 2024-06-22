@@ -7,12 +7,12 @@ async fn sets_and_gets_keys() -> anyhow::Result<()> {
 
     assert_eq!(
         "key does not exist",
-        service.json_get("key").await.unwrap_err().to_string()
+        service.get("key").await.unwrap_err().to_string()
     );
 
-    service.json_set("key", r#""value""#).await?;
+    service.set("key", r#""value""#).await?;
 
-    assert_eq!(r#""value""#, service.json_get("key").await?);
+    assert_eq!(r#""value""#, service.get("key").await?);
 
     Ok(())
 }
@@ -21,11 +21,11 @@ async fn sets_and_gets_keys() -> anyhow::Result<()> {
 async fn replaces_existing_key() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.json_set("key", r#""value1""#).await?;
-    service.json_set("key", r#""value2""#).await?;
-    service.json_set("key", r#""value3""#).await?;
+    service.set("key", r#""value1""#).await?;
+    service.set("key", r#""value2""#).await?;
+    service.set("key", r#""value3""#).await?;
 
-    assert_eq!(r#""value3""#, service.json_get("key").await?);
+    assert_eq!(r#""value3""#, service.get("key").await?);
 
     Ok(())
 }
@@ -34,14 +34,14 @@ async fn replaces_existing_key() -> anyhow::Result<()> {
 async fn deletes_keys() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.json_set("key", r#""value""#).await?;
-    service.json_get("key").await?;
+    service.set("key", r#""value""#).await?;
+    service.get("key").await?;
 
-    service.json_del("key").await?;
+    service.del("key").await?;
 
     assert_eq!(
         "key does not exist",
-        service.json_get("key").await.unwrap_err().to_string()
+        service.get("key").await.unwrap_err().to_string()
     );
 
     Ok(())
@@ -53,11 +53,7 @@ async fn validates_json() -> anyhow::Result<()> {
 
     assert_eq!(
         "Execution Error: error returned from database: (code: 1) malformed JSON",
-        service
-            .json_set("key", "value")
-            .await
-            .unwrap_err()
-            .to_string()
+        service.set("key", "value").await.unwrap_err().to_string()
     );
 
     Ok(())
@@ -67,13 +63,13 @@ async fn validates_json() -> anyhow::Result<()> {
 async fn formats_json() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.json_set("key", r#"{"key":"value"}"#).await?;
+    service.set("key", r#"{"key":"value"}"#).await?;
 
     assert_eq!(
         r#"{
     "key": "value"
 }"#,
-        service.json_get("key").await?
+        service.get("key").await?
     );
 
     Ok(())
@@ -84,7 +80,7 @@ async fn maintains_order() -> anyhow::Result<()> {
     let service = Service::default();
 
     service
-        .json_set(
+        .set(
             "key",
             r#"{"z_key":"value","A_key":"value","a_key":"value"}"#,
         )
@@ -96,7 +92,7 @@ async fn maintains_order() -> anyhow::Result<()> {
     "A_key": "value",
     "a_key": "value"
 }"#,
-        service.json_get("key").await?
+        service.get("key").await?
     );
 
     Ok(())
