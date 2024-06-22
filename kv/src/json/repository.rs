@@ -2,13 +2,16 @@ use entity::key;
 use sea_orm::prelude::*;
 use sea_query::*;
 
+use crate::database::Database;
+
+#[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
 pub struct Repository {
-    db: DatabaseConnection,
+    db: Database,
 }
 
 impl Repository {
-    pub fn new(db: DatabaseConnection) -> Self {
+    pub fn new(db: Database) -> Self {
         Self { db }
     }
 
@@ -26,9 +29,9 @@ impl Repository {
             .and_where(key::Column::Id.eq(key.into()))
             .to_owned();
 
-        let result = self
-            .db
-            .query_one(self.db.get_database_backend().build(&select_statement))
+        let db = self.db.get();
+        let result = db
+            .query_one(db.get_database_backend().build(&select_statement))
             .await?;
 
         let value = result
@@ -53,8 +56,8 @@ impl Repository {
             ])?
             .to_owned();
 
-        self.db
-            .execute(self.db.get_database_backend().build(&insert_statement))
+        let db = self.db.get();
+        db.execute(db.get_database_backend().build(&insert_statement))
             .await?;
 
         Ok(())
@@ -70,8 +73,8 @@ impl Repository {
             .and_where(key::Column::Id.eq(key.into()))
             .to_owned();
 
-        self.db
-            .execute(self.db.get_database_backend().build(&delete_statement))
+        let db = self.db.get();
+        db.execute(db.get_database_backend().build(&delete_statement))
             .await?;
 
         Ok(())

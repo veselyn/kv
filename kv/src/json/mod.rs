@@ -3,18 +3,25 @@ mod repository;
 #[cfg(test)]
 mod tests;
 
-pub use repository::Repository;
-
-use crate::app::App;
-
 use self::format::format;
+pub use self::repository::Repository;
 
-impl App {
+#[cfg_attr(test, derive(Default))]
+#[derive(Debug)]
+pub struct Service {
+    repository: Repository,
+}
+
+impl Service {
+    pub fn new(repository: Repository) -> Self {
+        Self { repository }
+    }
+
     pub async fn json_get<S>(&self, key: S) -> anyhow::Result<String>
     where
         S: Into<String>,
     {
-        let result = self.json_repository.get(key).await?;
+        let result = self.repository.get(key).await?;
         let value = result.ok_or(anyhow::anyhow!("key does not exist"))?;
         let formatted = format(value)?;
 
@@ -25,7 +32,7 @@ impl App {
     where
         S: Into<String>,
     {
-        self.json_repository.set(key, value).await?;
+        self.repository.set(key, value).await?;
 
         Ok(())
     }
@@ -34,7 +41,7 @@ impl App {
     where
         S: Into<String>,
     {
-        self.json_repository.del(key).await?;
+        self.repository.del(key).await?;
 
         Ok(())
     }

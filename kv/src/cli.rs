@@ -31,14 +31,14 @@ impl Cli {
         match self.command {
             Command::Json(json_command) => match json_command {
                 JsonCommand::Get { key } => {
-                    let value = app.json_get(key).await?;
+                    let value = app.json.json_get(key).await?;
                     println!("{}", value);
                 }
                 JsonCommand::Set { key, value } => {
-                    app.json_set(key, value).await?;
+                    app.json.json_set(key, value).await?;
                 }
                 JsonCommand::Del { key } => {
-                    app.json_del(key).await?;
+                    app.json.json_del(key).await?;
                 }
             },
         }
