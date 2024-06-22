@@ -2,7 +2,7 @@ mod format;
 mod repository;
 
 use self::format::format;
-pub use self::repository::Repository;
+pub use self::repository::*;
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
