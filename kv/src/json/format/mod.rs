@@ -1,6 +1,6 @@
 mod error;
 
-use error::*;
+pub use error::*;
 
 pub fn format<S>(input: S) -> Result<String, Error>
 where

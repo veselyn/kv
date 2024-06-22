@@ -2,7 +2,7 @@ mod error;
 
 use crate::database::Database;
 use entity::key;
-use error::*;
+pub use error::*;
 use sea_orm::prelude::*;
 use sea_query::*;
 
