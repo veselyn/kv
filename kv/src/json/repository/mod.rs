@@ -1,26 +1,10 @@
+mod error;
+
 use crate::database::Database;
 use entity::key;
+use error::*;
 use sea_orm::prelude::*;
 use sea_query::*;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum GetError {
-    #[error(transparent)]
-    Other(#[from] DbErr),
-}
-
-#[derive(Debug, Error)]
-pub enum SetError {
-    #[error(transparent)]
-    Other(#[from] DbErr),
-}
-
-#[derive(Debug, Error)]
-pub enum DelError {
-    #[error(transparent)]
-    Other(#[from] DbErr),
-}
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
