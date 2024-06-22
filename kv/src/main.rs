@@ -1,7 +1,7 @@
 mod app;
 mod cli;
 mod database;
-mod migrations;
+mod json;
 
 use clap::Parser;
 use cli::Cli;
