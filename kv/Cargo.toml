@@ -16,8 +16,6 @@ env_logger = { version = "0.11.3", features = ["unstable-kv"] }
 jq-sys = { version = "0.2.2", features = ["bundled"] }
 libc = "0.2.155"
 log = { version = "0.4.21", features = ["kv", "kv_std"] }
-rusqlite = { version = "0.30.0", features = ["bundled"] }
-tempfile = "3.10.1"
 thiserror = "1.0.58"
 sea-orm = { version = "0.12.15", features = ["sqlx-sqlite", "runtime-async-std-native-tls", "sea-orm-internal", "debug-print"] }
 sea-query = { version = "0.30.7", default-features = false, features = ["sea-query-derive", "derive", "backend-sqlite"] }
