@@ -1,8 +1,7 @@
+use crate::database::Database;
 use entity::key;
 use sea_orm::prelude::*;
 use sea_query::*;
-
-use crate::database::Database;
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
