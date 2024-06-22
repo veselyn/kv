@@ -26,7 +26,7 @@ pub enum JsonCommand {
 
 impl Cli {
     pub async fn run(self) -> anyhow::Result<()> {
-        let app = App::new().await?;
+        let app = App::init().await?;
 
         match self.command {
             Command::Json(json_command) => match json_command {

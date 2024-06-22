@@ -10,7 +10,7 @@ pub struct App {
 }
 
 impl App {
-    pub async fn new() -> anyhow::Result<Self> {
+    pub async fn init() -> anyhow::Result<Self> {
         env_logger::init();
 
         let data_dir = dirs::data_dir().context("getting data directory")?;
