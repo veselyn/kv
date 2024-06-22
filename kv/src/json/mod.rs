@@ -1,7 +1,5 @@
 mod format;
 mod repository;
-#[cfg(test)]
-mod tests;
 
 use self::format::format;
 pub use self::repository::Repository;
@@ -46,3 +44,6 @@ impl Service {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests;
