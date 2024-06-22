@@ -1,10 +1,9 @@
 mod format;
+mod repository;
 #[cfg(test)]
 mod tests;
 
-use entity::key;
-use sea_orm::prelude::*;
-use sea_query::*;
+pub use repository::Repository;
 
 use crate::app::App;
 
@@ -15,29 +14,8 @@ impl App {
     where
         S: Into<String>,
     {
-        let key = key.into();
-
-        let select_statement = Query::select()
-            .expr_as(
-                Expr::cust_with_expr("JSON(?)", Expr::col(key::Column::Value)),
-                key::Column::Value,
-            )
-            .from(key::Entity)
-            .and_where(key::Column::Type.eq("json"))
-            .and_where(key::Column::Id.eq(key))
-            .to_owned();
-
-        let result = self
-            .db
-            .query_one(self.db.get_database_backend().build(&select_statement))
-            .await?;
-
-        let Some(result) = result else {
-            anyhow::bail!("key does not exist")
-        };
-
-        let value: String = result.try_get("", "value")?;
-
+        let result = self.json_repository.get(key).await?;
+        let value = result.ok_or(anyhow::anyhow!("key does not exist"))?;
         let formatted = format(value)?;
 
         Ok(formatted)
@@ -47,23 +25,7 @@ impl App {
     where
         S: Into<String>,
     {
-        let key = key.into();
-        let value = value.into();
-
-        let insert_statement = Query::insert()
-            .replace()
-            .into_table(key::Entity)
-            .columns([key::Column::Id, key::Column::Type, key::Column::Value])
-            .values([
-                key.into(),
-                "json".into(),
-                Expr::cust_with_expr("JSON(?)", value),
-            ])?
-            .to_owned();
-
-        self.db
-            .execute(self.db.get_database_backend().build(&insert_statement))
-            .await?;
+        self.json_repository.set(key, value).await?;
 
         Ok(())
     }
@@ -72,17 +34,7 @@ impl App {
     where
         S: Into<String>,
     {
-        let key = key.into();
-
-        let delete_statement = Query::delete()
-            .from_table(key::Entity)
-            .and_where(key::Column::Type.eq("json"))
-            .and_where(key::Column::Id.eq(key))
-            .to_owned();
-
-        self.db
-            .execute(self.db.get_database_backend().build(&delete_statement))
-            .await?;
+        self.json_repository.del(key).await?;
 
         Ok(())
     }

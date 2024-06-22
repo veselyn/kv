@@ -1,12 +1,11 @@
 use crate::database::Database;
 use anyhow::Context;
-use sea_orm::*;
 
 mod json;
 
 #[derive(Debug)]
 pub struct App {
-    db: DatabaseConnection,
+    json_repository: json::Repository,
 }
 
 impl App {
@@ -28,7 +27,9 @@ impl App {
         let db = Database::connect(db_url).await?;
         Database::migrate(&db).await?;
 
-        Ok(Self { db })
+        let json_repository = json::Repository::new(db.clone());
+
+        Ok(Self { json_repository })
     }
 }
 
@@ -45,6 +46,8 @@ impl Default for App {
             db
         });
 
-        Self { db }
+        let json_repository = json::Repository::new(db.clone());
+
+        Self { json_repository }
     }
 }
