@@ -4,11 +4,19 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("connecting to database: {0}")]
-    Connect(DbErr),
-    #[error("migrating database: {0}")]
-    Migrate(DbErr),
+    #[error(transparent)]
+    Connect(#[from] ConnectError),
+    #[error(transparent)]
+    Migrate(#[from] MigrateError),
 }
+
+#[derive(Debug, Error)]
+#[error("connecting to database: {0}")]
+pub struct ConnectError(DbErr);
+
+#[derive(Debug, Error)]
+#[error("migrating database: {0}")]
+pub struct MigrateError(DbErr);
 
 #[derive(Debug)]
 pub struct Database {
@@ -20,14 +28,14 @@ impl Database {
         &self.inner
     }
 
-    pub async fn connect<C>(options: C) -> Result<Self, Error>
+    pub async fn connect<C>(options: C) -> Result<Self, ConnectError>
     where
         C: Into<ConnectOptions>,
     {
         Ok(Self {
             inner: sea_orm::Database::connect(options)
                 .await
-                .map_err(Error::Connect)?,
+                .map_err(ConnectError)?,
         })
     }
 
@@ -40,13 +48,13 @@ impl Database {
         Ok(db)
     }
 
-    pub async fn migrate<'c, C>(database: C) -> Result<(), Error>
+    pub async fn migrate<'c, C>(database: C) -> Result<(), MigrateError>
     where
         C: migration::IntoSchemaManagerConnection<'c>,
     {
         migration::Migrator::up(database, None)
             .await
-            .map_err(Error::Migrate)?;
+            .map_err(MigrateError)?;
         Ok(())
     }
 }
