@@ -1,6 +1,8 @@
+mod error;
 mod format;
 mod repository;
 
+pub use error::*;
 use format::format;
 pub use repository::Repository;
 
@@ -15,12 +17,14 @@ impl Service {
         Self { repository }
     }
 
-    pub async fn get<S>(&self, key: S) -> anyhow::Result<String>
+    pub async fn get<S>(&self, key: S) -> Result<String, GetError>
     where
         S: Into<String>,
     {
-        let result = self.repository.get(key).await?;
-        let value = result.ok_or(anyhow::anyhow!("key does not exist"))?;
+        let key = key.into();
+
+        let result = self.repository.get(&key).await?;
+        let value = result.ok_or_else(|| GetError::KeyNotFound(key))?;
         let formatted = format(value)?;
 
         Ok(formatted)
