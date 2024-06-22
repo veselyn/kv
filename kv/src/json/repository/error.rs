@@ -7,13 +7,13 @@ pub enum GetError {
     Other(#[from] DbErr),
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum SetError {
     #[error(transparent)]
     Other(#[from] DbErr),
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum DelError {
     #[error(transparent)]
     Other(#[from] DbErr),
