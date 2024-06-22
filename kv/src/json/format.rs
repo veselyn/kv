@@ -88,6 +88,6 @@ impl Memstream {
 
 impl Drop for Memstream {
     fn drop(&mut self) {
-        assert!(self.closed, "memstream not closed");
+        self.close().expect("closing memstream");
     }
 }
