@@ -1,5 +1,14 @@
 use migration::MigratorTrait;
-use sea_orm::{ConnectOptions, DatabaseConnection};
+use sea_orm::{ConnectOptions, DatabaseConnection, DbErr};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("connecting to database: {0}")]
+    Connect(DbErr),
+    #[error("migrating database: {0}")]
+    Migrate(DbErr),
+}
 
 #[derive(Debug)]
 pub struct Database {
@@ -11,16 +20,18 @@ impl Database {
         &self.inner
     }
 
-    pub async fn connect<C>(options: C) -> anyhow::Result<Self>
+    pub async fn connect<C>(options: C) -> Result<Self, Error>
     where
         C: Into<ConnectOptions>,
     {
         Ok(Self {
-            inner: sea_orm::Database::connect(options).await?,
+            inner: sea_orm::Database::connect(options)
+                .await
+                .map_err(Error::Connect)?,
         })
     }
 
-    pub async fn connect_and_migrate<C>(options: C) -> anyhow::Result<Self>
+    pub async fn connect_and_migrate<C>(options: C) -> Result<Self, Error>
     where
         C: Into<ConnectOptions>,
     {
@@ -29,11 +40,13 @@ impl Database {
         Ok(db)
     }
 
-    pub async fn migrate<'c, C>(database: C) -> anyhow::Result<()>
+    pub async fn migrate<'c, C>(database: C) -> Result<(), Error>
     where
         C: migration::IntoSchemaManagerConnection<'c>,
     {
-        migration::Migrator::up(database, None).await?;
+        migration::Migrator::up(database, None)
+            .await
+            .map_err(Error::Migrate)?;
         Ok(())
     }
 }
