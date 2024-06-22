@@ -1,22 +1,8 @@
+mod error;
+
+use self::error::*;
 use migration::MigratorTrait;
-use sea_orm::{ConnectOptions, DatabaseConnection, DbErr};
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum Error {
-    #[error(transparent)]
-    Connect(#[from] ConnectError),
-    #[error(transparent)]
-    Migrate(#[from] MigrateError),
-}
-
-#[derive(Debug, Error)]
-#[error("connecting to database: {0}")]
-pub struct ConnectError(DbErr);
-
-#[derive(Debug, Error)]
-#[error("migrating database: {0}")]
-pub struct MigrateError(DbErr);
+use sea_orm::{ConnectOptions, DatabaseConnection};
 
 #[derive(Debug)]
 pub struct Database {
@@ -33,9 +19,7 @@ impl Database {
         C: Into<ConnectOptions>,
     {
         Ok(Self {
-            inner: sea_orm::Database::connect(options)
-                .await
-                .map_err(ConnectError)?,
+            inner: sea_orm::Database::connect(options).await?,
         })
     }
 
@@ -52,9 +36,7 @@ impl Database {
     where
         C: migration::IntoSchemaManagerConnection<'c>,
     {
-        migration::Migrator::up(database, None)
-            .await
-            .map_err(MigrateError)?;
+        migration::Migrator::up(database, None).await?;
         Ok(())
     }
 }
