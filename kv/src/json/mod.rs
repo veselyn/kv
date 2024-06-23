@@ -24,7 +24,7 @@ impl Service {
         let key = key.into();
 
         let result = self.repository.get(&key).await?;
-        let value = result.ok_or_else(|| GetError::KeyNotFound(key))?;
+        let value = result.ok_or_else(|| GetError::KeyNotFound(key.clone()))?;
         let formatted = format(value)?;
 
         Ok(formatted)
