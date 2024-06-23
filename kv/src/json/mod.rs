@@ -39,7 +39,7 @@ impl Service {
         Ok(())
     }
 
-    pub async fn del<S>(&self, key: S) -> anyhow::Result<()>
+    pub async fn del<S>(&self, key: S) -> Result<(), DelError>
     where
         S: Into<String>,
     {
