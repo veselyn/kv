@@ -3,7 +3,7 @@ use thiserror::Error;
 use crate::database;
 
 #[derive(Debug, Error)]
-pub enum Error {
+pub enum InitError {
     #[error("initializing logger: {0}")]
     Logger(#[from] log::SetLoggerError),
     #[error("getting os specific data dir")]
