@@ -52,7 +52,7 @@ async fn validates_json() -> anyhow::Result<()> {
     let service = Service::default();
 
     assert_eq!(
-        "Execution Error: error returned from database: (code: 1) malformed JSON",
+        "setting key into repository: Execution Error: error returned from database: (code: 1) malformed JSON",
         service.set("key", "value").await.unwrap_err().to_string()
     );
 

@@ -30,7 +30,7 @@ impl Service {
         Ok(formatted)
     }
 
-    pub async fn set<S>(&self, key: S, value: S) -> anyhow::Result<()>
+    pub async fn set<S>(&self, key: S, value: S) -> Result<(), SetError>
     where
         S: Into<String>,
     {

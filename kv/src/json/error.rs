@@ -11,3 +11,9 @@ pub enum GetError {
     #[error("getting key from repository: {0}")]
     Repository(#[from] repository::GetError),
 }
+
+#[derive(Debug, Error, PartialEq)]
+pub enum SetError {
+    #[error("setting key into repository: {0}")]
+    Repository(#[from] repository::SetError),
+}
