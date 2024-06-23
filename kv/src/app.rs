@@ -18,8 +18,7 @@ impl App {
             .create(true)
             .truncate(false)
             .append(true)
-            .open(&db_path)
-            .expect("yes");
+            .open(&db_path)?;
         let db_url = format!("sqlite://{}", db_path.display());
 
         let db = Database::connect_and_migrate(db_url).await?;
