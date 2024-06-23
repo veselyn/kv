@@ -5,10 +5,10 @@ use pretty_assertions::assert_eq;
 async fn sets_and_gets_keys() -> anyhow::Result<()> {
     let service = Service::default();
 
-    assert_eq!(
-        Err(GetError::KeyNotFound("key".to_string())),
-        service.get("key").await
-    );
+    assert!(matches!(
+        service.get("key").await,
+        Err(GetError::KeyNotFound(key)) if key == "key"
+    ));
 
     service.set("key", r#""value""#).await?;
 
@@ -39,10 +39,10 @@ async fn deletes_keys() -> anyhow::Result<()> {
 
     service.del("key").await?;
 
-    assert_eq!(
-        Err(GetError::KeyNotFound("key".to_string())),
-        service.get("key").await
-    );
+    assert!(matches!(
+        service.get("key").await,
+        Err(GetError::KeyNotFound(key)) if key == "key",
+    ));
 
     Ok(())
 }

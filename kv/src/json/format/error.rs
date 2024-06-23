@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Debug, Error)]
 pub enum Error {
     #[error("input contains nul character: {0}")]
     NulInput(#[from] std::ffi::NulError),

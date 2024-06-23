@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use super::{format, repository};
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Debug, Error)]
 pub enum GetError {
     #[error("key not found: {0}")]
     KeyNotFound(String),
@@ -12,13 +12,13 @@ pub enum GetError {
     Repository(#[from] repository::GetError),
 }
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Debug, Error)]
 pub enum SetError {
     #[error("setting key into repository: {0}")]
     Repository(#[from] repository::SetError),
 }
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Debug, Error)]
 pub enum DelError {
     #[error("deleting key from repository: {0}")]
     Repository(#[from] repository::DelError),
