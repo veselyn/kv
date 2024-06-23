@@ -1,8 +1,10 @@
+mod error;
 mod format;
 mod repository;
 
-use self::format::format;
-pub use self::repository::Repository;
+pub use error::*;
+use format::format;
+pub use repository::Repository;
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
@@ -15,18 +17,20 @@ impl Service {
         Self { repository }
     }
 
-    pub async fn get<S>(&self, key: S) -> anyhow::Result<String>
+    pub async fn get<S>(&self, key: S) -> Result<String, GetError>
     where
         S: Into<String>,
     {
-        let result = self.repository.get(key).await?;
-        let value = result.ok_or(anyhow::anyhow!("key does not exist"))?;
+        let key = key.into();
+
+        let result = self.repository.get(&key).await?;
+        let value = result.ok_or_else(|| GetError::KeyNotFound(key.clone()))?;
         let formatted = format(value)?;
 
         Ok(formatted)
     }
 
-    pub async fn set<S>(&self, key: S, value: S) -> anyhow::Result<()>
+    pub async fn set<S>(&self, key: S, value: S) -> Result<(), SetError>
     where
         S: Into<String>,
     {
@@ -35,7 +39,7 @@ impl Service {
         Ok(())
     }
 
-    pub async fn del<S>(&self, key: S) -> anyhow::Result<()>
+    pub async fn del<S>(&self, key: S) -> Result<(), DelError>
     where
         S: Into<String>,
     {

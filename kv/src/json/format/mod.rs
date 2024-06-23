@@ -1,4 +1,8 @@
-pub fn format<S>(input: S) -> anyhow::Result<String>
+mod error;
+
+pub use error::*;
+
+pub fn format<S>(input: S) -> Result<String, Error>
 where
     S: Into<String>,
 {
@@ -41,7 +45,7 @@ struct Memstream {
 }
 
 impl Memstream {
-    fn open() -> anyhow::Result<Self> {
+    fn open() -> Result<Self, Error> {
         let mut memstream = Self {
             buffer: Box::into_raw(Box::new(std::ptr::null_mut())),
             size: Box::into_raw(Box::new(0)),
@@ -50,7 +54,10 @@ impl Memstream {
         };
 
         let file = unsafe { libc::open_memstream(memstream.buffer, memstream.size) };
-        anyhow::ensure!(!file.is_null());
+        if file.is_null() {
+            return Err(Error::OpenMemstreamFile);
+        }
+
         memstream.file = file;
 
         Ok(memstream)
@@ -62,7 +69,7 @@ impl Memstream {
         };
     }
 
-    fn close(&mut self) -> anyhow::Result<()> {
+    fn close(&mut self) -> Result<(), Error> {
         if self.closed {
             return Ok(());
         }
@@ -70,7 +77,9 @@ impl Memstream {
         let status = unsafe { libc::fclose(self.file) };
         unsafe { libc::free(*self.buffer as *mut libc::c_void) }
 
-        anyhow::ensure!(!status.is_positive());
+        if status.is_positive() {
+            return Err(Error::CloseMemstreamFile(status));
+        }
 
         unsafe {
             drop(Box::from_raw(self.buffer));
@@ -88,6 +97,6 @@ impl Memstream {
 
 impl Drop for Memstream {
     fn drop(&mut self) {
-        assert!(self.closed, "memstream not closed");
+        self.close().expect("closing memstream");
     }
 }

@@ -1,6 +1,5 @@
-use clap::{Parser, Subcommand};
-
 use crate::app::App;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
 pub struct Cli {

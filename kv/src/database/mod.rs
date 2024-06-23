@@ -1,3 +1,6 @@
+mod error;
+
+pub use error::*;
 use migration::MigratorTrait;
 use sea_orm::{ConnectOptions, DatabaseConnection};
 
@@ -11,7 +14,7 @@ impl Database {
         &self.inner
     }
 
-    pub async fn connect<C>(options: C) -> anyhow::Result<Self>
+    pub async fn connect<C>(options: C) -> Result<Self, ConnectError>
     where
         C: Into<ConnectOptions>,
     {
@@ -20,7 +23,7 @@ impl Database {
         })
     }
 
-    pub async fn connect_and_migrate<C>(options: C) -> anyhow::Result<Self>
+    pub async fn connect_and_migrate<C>(options: C) -> Result<Self, Error>
     where
         C: Into<ConnectOptions>,
     {
@@ -29,7 +32,7 @@ impl Database {
         Ok(db)
     }
 
-    pub async fn migrate<'c, C>(database: C) -> anyhow::Result<()>
+    pub async fn migrate<'c, C>(database: C) -> Result<(), MigrateError>
     where
         C: migration::IntoSchemaManagerConnection<'c>,
     {

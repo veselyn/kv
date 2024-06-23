@@ -5,10 +5,10 @@ use pretty_assertions::assert_eq;
 async fn sets_and_gets_keys() -> anyhow::Result<()> {
     let service = Service::default();
 
-    assert_eq!(
-        "key does not exist",
-        service.get("key").await.unwrap_err().to_string()
-    );
+    assert!(matches!(
+        service.get("key").await,
+        Err(GetError::KeyNotFound(key)) if key == "key"
+    ));
 
     service.set("key", r#""value""#).await?;
 
@@ -39,10 +39,10 @@ async fn deletes_keys() -> anyhow::Result<()> {
 
     service.del("key").await?;
 
-    assert_eq!(
-        "key does not exist",
-        service.get("key").await.unwrap_err().to_string()
-    );
+    assert!(matches!(
+        service.get("key").await,
+        Err(GetError::KeyNotFound(key)) if key == "key",
+    ));
 
     Ok(())
 }
@@ -52,7 +52,7 @@ async fn validates_json() -> anyhow::Result<()> {
     let service = Service::default();
 
     assert_eq!(
-        "Execution Error: error returned from database: (code: 1) malformed JSON",
+        "setting key into repository: Execution Error: error returned from database: (code: 1) malformed JSON",
         service.set("key", "value").await.unwrap_err().to_string()
     );
 

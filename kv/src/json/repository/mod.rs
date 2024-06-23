@@ -1,8 +1,10 @@
-use entity::key;
-use sea_orm::prelude::*;
-use sea_query::*;
+mod error;
 
 use crate::database::Database;
+use entity::key;
+pub use error::*;
+use sea_orm::prelude::*;
+use sea_query::*;
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
@@ -15,7 +17,7 @@ impl Repository {
         Self { db }
     }
 
-    pub async fn get<S>(&self, key: S) -> anyhow::Result<Option<String>>
+    pub async fn get<S>(&self, key: S) -> Result<Option<String>, GetError>
     where
         S: Into<String>,
     {
@@ -41,7 +43,7 @@ impl Repository {
         Ok(value)
     }
 
-    pub async fn set<S>(&self, key: S, value: S) -> anyhow::Result<()>
+    pub async fn set<S>(&self, key: S, value: S) -> Result<(), SetError>
     where
         S: Into<String>,
     {
@@ -49,11 +51,11 @@ impl Repository {
             .replace()
             .into_table(key::Entity)
             .columns([key::Column::Id, key::Column::Type, key::Column::Value])
-            .values([
+            .values_panic([
                 key.into().into(),
                 "json".into(),
                 Expr::cust_with_expr("JSON(?)", value.into()),
-            ])?
+            ])
             .to_owned();
 
         let db = self.db.get();
@@ -63,7 +65,7 @@ impl Repository {
         Ok(())
     }
 
-    pub async fn del<S>(&self, key: S) -> anyhow::Result<()>
+    pub async fn del<S>(&self, key: S) -> Result<(), DelError>
     where
         S: Into<String>,
     {
