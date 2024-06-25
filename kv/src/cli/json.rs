@@ -1,8 +1,7 @@
-use clap::{Args, Subcommand};
-
+use super::command::{self, Execute};
 use crate::app::App;
-
-use super::command::Execute;
+use clap::{Args, Subcommand};
+use std::process::ExitCode;
 
 #[derive(Subcommand, Debug)]
 pub enum Command {
@@ -15,13 +14,12 @@ pub enum Command {
 }
 
 impl Execute for Command {
-    async fn execute(self, app: App) -> anyhow::Result<()> {
+    async fn execute(self, app: App) -> command::Result {
         match self {
-            Self::Get(command) => command.execute(app).await?,
-            Self::Set(command) => command.execute(app).await?,
-            Self::Del(command) => command.execute(app).await?,
+            Self::Get(command) => command.execute(app).await,
+            Self::Set(command) => command.execute(app).await,
+            Self::Del(command) => command.execute(app).await,
         }
-        Ok(())
     }
 }
 
@@ -31,10 +29,19 @@ pub struct GetCommand {
 }
 
 impl Execute for GetCommand {
-    async fn execute(self, app: App) -> anyhow::Result<()> {
-        let value = app.json.get(self.key).await?;
-        println!("{}", value);
-        Ok(())
+    async fn execute(self, app: App) -> command::Result {
+        match app.json.get(self.key).await {
+            Ok(value) => command::Result {
+                stdout: Some(value),
+                stderr: None,
+                status: None,
+            },
+            Err(err) => command::Result {
+                stdout: None,
+                stderr: Some(err.to_string()),
+                status: Some(ExitCode::FAILURE),
+            },
+        }
     }
 }
 
@@ -45,9 +52,19 @@ pub struct SetCommand {
 }
 
 impl Execute for SetCommand {
-    async fn execute(self, app: App) -> anyhow::Result<()> {
-        app.json.set(self.key, self.value).await?;
-        Ok(())
+    async fn execute(self, app: App) -> command::Result {
+        match app.json.set(self.key, self.value).await {
+            Ok(_) => command::Result {
+                stdout: None,
+                stderr: None,
+                status: None,
+            },
+            Err(err) => command::Result {
+                stdout: None,
+                stderr: Some(err.to_string()),
+                status: Some(ExitCode::FAILURE),
+            },
+        }
     }
 }
 
@@ -57,8 +74,18 @@ pub struct DelCommand {
 }
 
 impl Execute for DelCommand {
-    async fn execute(self, app: App) -> anyhow::Result<()> {
-        app.json.del(self.key).await?;
-        Ok(())
+    async fn execute(self, app: App) -> command::Result {
+        match app.json.del(self.key).await {
+            Ok(_) => command::Result {
+                stdout: None,
+                stderr: None,
+                status: None,
+            },
+            Err(err) => command::Result {
+                stdout: None,
+                stderr: Some(err.to_string()),
+                status: Some(ExitCode::FAILURE),
+            },
+        }
     }
 }
