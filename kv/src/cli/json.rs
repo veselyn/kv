@@ -2,7 +2,7 @@ use clap::{Args, Subcommand};
 
 use crate::app::App;
 
-use super::execute::Execute;
+use super::command::Execute;
 
 #[derive(Subcommand, Debug)]
 pub enum Command {

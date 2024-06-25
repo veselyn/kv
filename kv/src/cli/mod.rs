@@ -1,9 +1,9 @@
-mod execute;
+mod command;
 mod json;
 
 use crate::app::App;
 use clap::{Parser, Subcommand};
-use execute::Execute;
+use command::Execute;
 
 #[derive(Parser, Debug)]
 pub struct Cli {
