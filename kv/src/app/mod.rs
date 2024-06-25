@@ -10,7 +10,7 @@ pub struct App {
 
 impl App {
     pub async fn init() -> Result<Self, InitError> {
-        env_logger::try_init()?;
+        env_logger::init();
 
         let data_dir = dirs::data_dir().ok_or(InitError::GetDataDir)?;
 
