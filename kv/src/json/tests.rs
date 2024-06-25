@@ -51,10 +51,10 @@ async fn deletes_keys() -> anyhow::Result<()> {
 async fn validates_json() -> anyhow::Result<()> {
     let service = Service::default();
 
-    assert_eq!(
-        "setting key into repository: Execution Error: error returned from database: (code: 1) malformed JSON",
-        service.set("key", "value").await.unwrap_err().to_string()
-    );
+    assert!(matches!(
+        service.set("key", "value").await,
+        Err(SetError::InvalidJson(_))
+    ));
 
     Ok(())
 }

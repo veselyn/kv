@@ -34,7 +34,13 @@ impl Service {
     where
         S: Into<String>,
     {
-        self.repository.set(key, value).await?;
+        self.repository
+            .set(key, value)
+            .await
+            .map_err(|err| match err {
+                repository::SetError::MalformedJson(_) => SetError::InvalidJson(err),
+                repository::SetError::Other(_) => SetError::from(err),
+            })?;
 
         Ok(())
     }

@@ -60,7 +60,16 @@ impl Repository {
 
         let db = self.db.get();
         db.execute(db.get_database_backend().build(&insert_statement))
-            .await?;
+            .await
+            .map_err(|db_err| match db_err {
+                DbErr::Exec(RuntimeErr::SqlxError(SqlxError::Database(ref err))) => {
+                    match (err.code().as_deref(), err.message()) {
+                        (Some("1"), "malformed JSON") => SetError::MalformedJson(db_err),
+                        _ => SetError::from(db_err),
+                    }
+                }
+                err => SetError::from(err),
+            })?;
 
         Ok(())
     }

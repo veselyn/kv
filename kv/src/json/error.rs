@@ -14,6 +14,8 @@ pub enum GetError {
 
 #[derive(Debug, Error)]
 pub enum SetError {
+    #[error("received invalid json")]
+    InvalidJson(#[source] repository::SetError),
     #[error("setting key into repository: {0}")]
     Repository(#[from] repository::SetError),
 }
