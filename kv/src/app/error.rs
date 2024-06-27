@@ -3,7 +3,7 @@ use thiserror::Error;
 use crate::database;
 
 #[derive(Debug, Error)]
-pub enum InitError {
+pub enum NewError {
     #[error("getting os specific data dir")]
     GetDataDir,
     #[error("creating kv dir in data dir: {0}")]

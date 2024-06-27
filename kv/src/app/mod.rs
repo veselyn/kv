@@ -9,13 +9,13 @@ pub struct App {
 }
 
 impl App {
-    pub async fn init() -> Result<Self, InitError> {
+    pub async fn new() -> Result<Self, NewError> {
         env_logger::init();
 
-        let data_dir = dirs::data_dir().ok_or(InitError::GetDataDir)?;
+        let data_dir = dirs::data_dir().ok_or(NewError::GetDataDir)?;
 
         let db_dir = data_dir.join("kv");
-        std::fs::create_dir_all(&db_dir).map_err(InitError::CreateKvDir)?;
+        std::fs::create_dir_all(&db_dir).map_err(NewError::CreateKvDir)?;
 
         let db_path = db_dir.join("db");
         std::fs::File::options()
@@ -23,7 +23,7 @@ impl App {
             .truncate(false)
             .append(true)
             .open(&db_path)
-            .map_err(InitError::CreateDbFile)?;
+            .map_err(NewError::CreateDbFile)?;
 
         let db_url = format!("sqlite://{}", db_path.display());
 

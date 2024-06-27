@@ -19,7 +19,7 @@ pub enum Command {
 
 impl Cli {
     pub async fn run(self) -> command::Result {
-        let app = match App::init().await {
+        let app = match App::new().await {
             Ok(app) => app,
             Err(err) => return Err(command::Error::default().message(err.to_string())),
         };
