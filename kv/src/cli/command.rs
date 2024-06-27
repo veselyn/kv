@@ -9,8 +9,8 @@ pub type Result = result::Result<Output, Error>;
 
 #[derive(Default, Debug)]
 pub struct Output {
-    pub stdout: Option<String>,
-    pub stderr: Option<String>,
+    pub stdout: String,
+    pub stderr: String,
 }
 
 impl Display for Output {
@@ -37,13 +37,10 @@ impl Output {
     where
         W: Write,
     {
-        match &self.stdout {
-            Some(stdout) if !stdout.is_empty() => {
-                write!(writer, "{}", stdout)?;
-                writeln!(writer)?;
-            }
-            _ => (),
-        };
+        if !self.stdout.is_empty() {
+            write!(writer, "{}", self.stdout)?;
+            writeln!(writer)?;
+        }
         Ok(())
     }
 
@@ -51,14 +48,21 @@ impl Output {
     where
         W: Write,
     {
-        match &self.stderr {
-            Some(stderr) if !stderr.is_empty() => {
-                write!(writer, "{}", stderr)?;
-                writeln!(writer)?;
-            }
-            _ => (),
-        };
+        if !self.stderr.is_empty() {
+            write!(writer, "{}", self.stderr)?;
+            writeln!(writer)?;
+        }
         Ok(())
+    }
+
+    pub fn stdout(mut self, stdout: String) -> Self {
+        self.stdout = stdout;
+        self
+    }
+
+    pub fn _stderr(mut self, stderr: String) -> Self {
+        self.stderr = stderr;
+        self
     }
 }
 

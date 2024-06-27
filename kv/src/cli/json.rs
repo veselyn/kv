@@ -33,10 +33,7 @@ impl Execute for GetCommand {
         app.json
             .get(self.key)
             .await
-            .map(|value| command::Output {
-                stdout: Some(value),
-                stderr: None,
-            })
+            .map(|value| command::Output::default().stdout(value))
             .map_err(|err| {
                 command::Error::default().message(match err {
                     GetError::KeyNotFound(key) => {
