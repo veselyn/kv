@@ -54,7 +54,8 @@ impl Output {
         self
     }
 
-    pub fn _stderr(mut self, stderr: String) -> Self {
+    #[allow(dead_code)]
+    pub fn stderr(mut self, stderr: String) -> Self {
         self.stderr = stderr;
         self
     }
@@ -111,3 +112,6 @@ impl Error {
 pub trait Execute {
     async fn execute(self, app: App) -> Result;
 }
+
+#[cfg(test)]
+mod tests;
