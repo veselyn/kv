@@ -13,5 +13,6 @@ async fn main() -> ExitCode {
         .run()
         .await
         .inspect(|output| output.dump())
+        .inspect_err(|err| err.dump())
         .map_or_else(|err| err.status, |_| ExitCode::SUCCESS)
 }

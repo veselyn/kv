@@ -62,8 +62,7 @@ impl Output {
     }
 }
 
-#[derive(Error)]
-#[error("{:?}", self)]
+#[derive(Debug, Error)]
 pub struct Error {
     pub message: String,
     pub status: ExitCode,
@@ -78,16 +77,28 @@ impl Default for Error {
     }
 }
 
-impl Debug for Error {
+impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if !self.message.is_empty() {
             write!(f, "{}", self.message)?;
+            writeln!(f)?;
         }
         Ok(())
     }
 }
 
 impl Error {
+    pub fn dump(&self) {
+        self.dump_to(&mut std::io::stderr())
+    }
+
+    pub fn dump_to<W>(&self, writer: &mut W)
+    where
+        W: Write,
+    {
+        write!(writer, "{}", self).expect("dumping error");
+    }
+
     pub fn message(mut self, message: String) -> Self {
         self.message = message;
         self
