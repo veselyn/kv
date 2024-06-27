@@ -13,12 +13,6 @@ pub struct Output {
     pub stderr: String,
 }
 
-impl Display for Output {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("wow really")
-    }
-}
-
 impl Output {
     pub fn dump(&self) {
         self.dump_to(&mut std::io::stdout(), &mut std::io::stderr());
