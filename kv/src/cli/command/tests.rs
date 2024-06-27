@@ -38,3 +38,13 @@ fn output_dumps_both() {
     assert_eq!("stdout\n".as_bytes(), stdout);
     assert_eq!("stderr\n".as_bytes(), stderr);
 }
+
+#[test]
+fn error_dumps_message() {
+    let error = Error::default().message("message".to_owned());
+
+    let mut message = vec![];
+    error.dump_to(&mut message);
+
+    assert_eq!("Error: message\n".as_bytes(), message);
+}
