@@ -1,7 +1,6 @@
 use super::command::{self, Execute};
 use crate::app::App;
 use clap::{Args, Subcommand};
-use std::process::ExitCode;
 
 #[derive(Subcommand, Debug)]
 pub enum Command {
@@ -30,18 +29,14 @@ pub struct GetCommand {
 
 impl Execute for GetCommand {
     async fn execute(self, app: App) -> command::Result {
-        match app.json.get(self.key).await {
-            Ok(value) => command::Result {
+        app.json
+            .get(self.key)
+            .await
+            .map(|value| command::Output {
                 stdout: Some(value),
                 stderr: None,
-                status: None,
-            },
-            Err(err) => command::Result {
-                stdout: None,
-                stderr: Some(err.to_string()),
-                status: Some(ExitCode::FAILURE),
-            },
-        }
+            })
+            .map_err(|err| command::Error::default().message(err.to_string()))
     }
 }
 
@@ -53,18 +48,11 @@ pub struct SetCommand {
 
 impl Execute for SetCommand {
     async fn execute(self, app: App) -> command::Result {
-        match app.json.set(self.key, self.value).await {
-            Ok(_) => command::Result {
-                stdout: None,
-                stderr: None,
-                status: None,
-            },
-            Err(err) => command::Result {
-                stdout: None,
-                stderr: Some(err.to_string()),
-                status: Some(ExitCode::FAILURE),
-            },
-        }
+        app.json
+            .set(self.key, self.value)
+            .await
+            .map(|_| command::Output::default())
+            .map_err(|err| command::Error::default().message(err.to_string()))
     }
 }
 
@@ -75,17 +63,10 @@ pub struct DelCommand {
 
 impl Execute for DelCommand {
     async fn execute(self, app: App) -> command::Result {
-        match app.json.del(self.key).await {
-            Ok(_) => command::Result {
-                stdout: None,
-                stderr: None,
-                status: None,
-            },
-            Err(err) => command::Result {
-                stdout: None,
-                stderr: Some(err.to_string()),
-                status: Some(ExitCode::FAILURE),
-            },
-        }
+        app.json
+            .del(self.key)
+            .await
+            .map(|_| command::Output::default())
+            .map_err(|err| command::Error::default().message(err.to_string()))
     }
 }
