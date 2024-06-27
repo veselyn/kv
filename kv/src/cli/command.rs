@@ -7,43 +7,6 @@ use thiserror::Error;
 
 pub type Result = result::Result<Output, Error>;
 
-#[derive(Error)]
-#[error("{:?}", self)]
-pub struct Error {
-    pub message: String,
-    pub status: ExitCode,
-}
-
-impl Default for Error {
-    fn default() -> Self {
-        Self {
-            message: "Something went wrong".to_string(),
-            status: ExitCode::FAILURE,
-        }
-    }
-}
-
-impl Debug for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if !self.message.is_empty() {
-            write!(f, "{}", self.message)?;
-        }
-        Ok(())
-    }
-}
-
-impl Error {
-    pub fn message(mut self, message: String) -> Self {
-        self.message = message;
-        self
-    }
-
-    pub fn _status(mut self, status: ExitCode) -> Self {
-        self.status = status;
-        self
-    }
-}
-
 #[derive(Default, Debug)]
 pub struct Output {
     pub stdout: Option<String>,
@@ -96,6 +59,43 @@ impl Output {
             _ => (),
         };
         Ok(())
+    }
+}
+
+#[derive(Error)]
+#[error("{:?}", self)]
+pub struct Error {
+    pub message: String,
+    pub status: ExitCode,
+}
+
+impl Default for Error {
+    fn default() -> Self {
+        Self {
+            message: "Something went wrong".to_string(),
+            status: ExitCode::FAILURE,
+        }
+    }
+}
+
+impl Debug for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if !self.message.is_empty() {
+            write!(f, "{}", self.message)?;
+        }
+        Ok(())
+    }
+}
+
+impl Error {
+    pub fn message(mut self, message: String) -> Self {
+        self.message = message;
+        self
+    }
+
+    pub fn _status(mut self, status: ExitCode) -> Self {
+        self.status = status;
+        self
     }
 }
 
