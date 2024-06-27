@@ -80,7 +80,7 @@ impl Default for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if !self.message.is_empty() {
-            write!(f, "{}", self.message)?;
+            write!(f, "Error: {}", self.message)?;
             writeln!(f)?;
         }
         Ok(())
