@@ -1,5 +1,6 @@
 use super::command::{self, Execute};
 use crate::app::App;
+use crate::json::{GetError, SetError};
 use clap::{Args, Subcommand};
 
 #[derive(Subcommand, Debug)]
@@ -36,7 +37,14 @@ impl Execute for GetCommand {
                 stdout: Some(value),
                 stderr: None,
             })
-            .map_err(|err| command::Error::default().message(err.to_string()))
+            .map_err(|err| {
+                command::Error::default().message(match err {
+                    GetError::KeyNotFound(key) => {
+                        format!(r#"key "{}" not found"#, key)
+                    }
+                    err => err.to_string(),
+                })
+            })
     }
 }
 
@@ -52,7 +60,12 @@ impl Execute for SetCommand {
             .set(self.key, self.value)
             .await
             .map(|_| command::Output::default())
-            .map_err(|err| command::Error::default().message(err.to_string()))
+            .map_err(|err| {
+                command::Error::default().message(match err {
+                    SetError::InvalidJson(_) => "invalid JSON".to_string(),
+                    err => err.to_string(),
+                })
+            })
     }
 }
 
