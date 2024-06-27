@@ -48,3 +48,13 @@ fn error_dumps_message() {
 
     assert_eq!("Error: message\n".as_bytes(), message);
 }
+
+#[test]
+fn error_status_defaults_to_failure() {
+    assert_eq!(1, Error::default().status);
+}
+
+#[test]
+fn error_status_can_be_set() {
+    assert_eq!(2, Error::default().status(2).status);
+}

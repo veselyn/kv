@@ -1,7 +1,6 @@
 use crate::app::App;
 use std::fmt::{Debug, Display};
 use std::io::{self, Write};
-use std::process::ExitCode;
 use std::result;
 use thiserror::Error;
 
@@ -64,14 +63,14 @@ impl Output {
 #[derive(Debug, Error)]
 pub struct Error {
     pub message: String,
-    pub status: ExitCode,
+    pub status: u8,
 }
 
 impl Default for Error {
     fn default() -> Self {
         Self {
             message: "Something went wrong".to_owned(),
-            status: ExitCode::FAILURE,
+            status: 1,
         }
     }
 }
@@ -103,7 +102,8 @@ impl Error {
         self
     }
 
-    pub fn _status(mut self, status: ExitCode) -> Self {
+    #[allow(dead_code)]
+    pub fn status(mut self, status: u8) -> Self {
         self.status = status;
         self
     }
