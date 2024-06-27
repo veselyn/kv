@@ -1,6 +1,8 @@
+mod config;
 mod error;
 
 use crate::{database::Database, json};
+pub use config::*;
 pub use error::*;
 
 #[derive(Debug)]
@@ -12,20 +14,24 @@ impl App {
     pub async fn new() -> Result<Self, NewError> {
         env_logger::init();
 
-        let data_dir = dirs::data_dir().ok_or(NewError::GetDataDir)?;
+        let config = Config::try_default()?;
 
-        let db_dir = data_dir.join("kv");
-        std::fs::create_dir_all(&db_dir).map_err(NewError::CreateKvDir)?;
+        std::fs::create_dir_all(
+            config
+                .db_path
+                .parent()
+                .ok_or_else(|| NewError::InvalidDbPath(config.db_path.clone()))?,
+        )
+        .map_err(NewError::CreateKvDir)?;
 
-        let db_path = db_dir.join("db");
         std::fs::File::options()
             .create(true)
             .truncate(false)
             .append(true)
-            .open(&db_path)
+            .open(&config.db_path)
             .map_err(NewError::CreateDbFile)?;
 
-        let db_url = format!("sqlite://{}", db_path.display());
+        let db_url = format!("sqlite://{}", config.db_path.display());
 
         let db = Database::connect_and_migrate(db_url).await?;
 
