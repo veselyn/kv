@@ -28,7 +28,7 @@ where
     log::trace!(memstream:?; "flushed memstream");
 
     let c_output = unsafe { std::ffi::CStr::from_ptr(*memstream.buffer) };
-    let output = c_output.to_str().map(|str| str.to_string());
+    let output = c_output.to_str().map(|str| str.to_owned());
 
     memstream.close()?;
     log::trace!(memstream:?; "closed memstream");

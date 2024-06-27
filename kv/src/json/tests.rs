@@ -7,7 +7,7 @@ async fn sets_and_gets_keys() -> anyhow::Result<()> {
 
     assert!(matches!(
         service.get("key").await,
-        Err(GetError::KeyNotFound(key)) if key == "key"
+        Err(GetError::KeyNotFound(key)) if key == "key",
     ));
 
     service.set("key", r#""value""#).await?;
@@ -18,7 +18,7 @@ async fn sets_and_gets_keys() -> anyhow::Result<()> {
 }
 
 #[async_std::test]
-async fn replaces_existing_key() -> anyhow::Result<()> {
+async fn replaces_existing_keys() -> anyhow::Result<()> {
     let service = Service::default();
 
     service.set("key", r#""value1""#).await?;
@@ -48,13 +48,25 @@ async fn deletes_keys() -> anyhow::Result<()> {
 }
 
 #[async_std::test]
+async fn fails_to_delete_non_existing_keys() -> anyhow::Result<()> {
+    let service = Service::default();
+
+    assert!(matches!(
+        service.del("key").await,
+        Err(DelError::KeyNotFound(key)) if key == "key",
+    ));
+
+    Ok(())
+}
+
+#[async_std::test]
 async fn validates_json() -> anyhow::Result<()> {
     let service = Service::default();
 
-    assert_eq!(
-        "setting key into repository: Execution Error: error returned from database: (code: 1) malformed JSON",
-        service.set("key", "value").await.unwrap_err().to_string()
-    );
+    assert!(matches!(
+        service.set("key", "value").await,
+        Err(SetError::InvalidJson(_)),
+    ));
 
     Ok(())
 }
@@ -69,7 +81,7 @@ async fn formats_json() -> anyhow::Result<()> {
         r#"{
     "key": "value"
 }"#,
-        service.get("key").await?
+        service.get("key").await?,
     );
 
     Ok(())
@@ -92,7 +104,7 @@ async fn maintains_order() -> anyhow::Result<()> {
     "A_key": "value",
     "a_key": "value"
 }"#,
-        service.get("key").await?
+        service.get("key").await?,
     );
 
     Ok(())

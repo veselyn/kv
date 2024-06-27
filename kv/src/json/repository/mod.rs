@@ -60,12 +60,21 @@ impl Repository {
 
         let db = self.db.get();
         db.execute(db.get_database_backend().build(&insert_statement))
-            .await?;
+            .await
+            .map_err(|db_err| match db_err {
+                DbErr::Exec(RuntimeErr::SqlxError(SqlxError::Database(ref err))) => {
+                    match (err.code().as_deref(), err.message()) {
+                        (Some("1"), "malformed JSON") => SetError::MalformedJson(db_err),
+                        _ => SetError::from(db_err),
+                    }
+                }
+                err => SetError::from(err),
+            })?;
 
         Ok(())
     }
 
-    pub async fn del<S>(&self, key: S) -> Result<(), DelError>
+    pub async fn del<S>(&self, key: S) -> Result<Option<()>, DelError>
     where
         S: Into<String>,
     {
@@ -76,9 +85,19 @@ impl Repository {
             .to_owned();
 
         let db = self.db.get();
-        db.execute(db.get_database_backend().build(&delete_statement))
+        let result = db
+            .execute(db.get_database_backend().build(&delete_statement))
             .await?;
 
-        Ok(())
+        let affected = result.rows_affected();
+
+        Ok(match affected {
+            1 => Some(()),
+            0 => None,
+            _ => panic!(
+                r#"{} rows were affected by delete when expected 1 or 0"#,
+                affected,
+            ),
+        })
     }
 }

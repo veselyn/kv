@@ -24,7 +24,7 @@ impl Service {
         let key = key.into();
 
         let result = self.repository.get(&key).await?;
-        let value = result.ok_or_else(|| GetError::KeyNotFound(key.clone()))?;
+        let value = result.ok_or_else(|| GetError::KeyNotFound(key))?;
         let formatted = format(value)?;
 
         Ok(formatted)
@@ -34,7 +34,13 @@ impl Service {
     where
         S: Into<String>,
     {
-        self.repository.set(key, value).await?;
+        self.repository
+            .set(key, value)
+            .await
+            .map_err(|err| match err {
+                repository::SetError::MalformedJson(_) => SetError::InvalidJson(err),
+                repository::SetError::Other(_) => SetError::from(err),
+            })?;
 
         Ok(())
     }
@@ -43,7 +49,10 @@ impl Service {
     where
         S: Into<String>,
     {
-        self.repository.del(key).await?;
+        let key = key.into();
+
+        let result = self.repository.del(&key).await?;
+        result.ok_or_else(|| DelError::KeyNotFound(key))?;
 
         Ok(())
     }

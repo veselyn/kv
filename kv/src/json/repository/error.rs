@@ -9,6 +9,8 @@ pub enum GetError {
 
 #[derive(Debug, Error)]
 pub enum SetError {
+    #[error("malformed json: {0}")]
+    MalformedJson(#[source] DbErr),
     #[error(transparent)]
     Other(#[from] DbErr),
 }

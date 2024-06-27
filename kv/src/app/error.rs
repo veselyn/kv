@@ -4,8 +4,6 @@ use crate::database;
 
 #[derive(Debug, Error)]
 pub enum InitError {
-    #[error("initializing logger: {0}")]
-    Logger(#[from] log::SetLoggerError),
     #[error("getting os specific data dir")]
     GetDataDir,
     #[error("creating kv dir in data dir: {0}")]
