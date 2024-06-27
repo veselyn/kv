@@ -69,7 +69,7 @@ pub struct Error {
 impl Default for Error {
     fn default() -> Self {
         Self {
-            message: "Something went wrong".to_string(),
+            message: "Something went wrong".to_owned(),
             status: ExitCode::FAILURE,
         }
     }

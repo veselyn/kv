@@ -59,7 +59,7 @@ impl Execute for SetCommand {
             .map(|_| command::Output::default())
             .map_err(|err| {
                 command::Error::default().message(match err {
-                    SetError::InvalidJson(_) => "invalid JSON".to_string(),
+                    SetError::InvalidJson(_) => "invalid JSON".to_owned(),
                     err => err.to_string(),
                 })
             })
