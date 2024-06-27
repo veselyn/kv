@@ -80,6 +80,9 @@ impl Execute for DelCommand {
             .map(|_| command::Output::default())
             .map_err(|err| {
                 command::Error::default().message(match err {
+                    DelError::KeyNotFound(key) => {
+                        format!(r#"key "{}" not found"#, key)
+                    }
                     DelError::Repository(_) => err.to_string(),
                 })
             })

@@ -74,7 +74,7 @@ impl Repository {
         Ok(())
     }
 
-    pub async fn del<S>(&self, key: S) -> Result<(), DelError>
+    pub async fn del<S>(&self, key: S) -> Result<Option<()>, DelError>
     where
         S: Into<String>,
     {
@@ -85,9 +85,19 @@ impl Repository {
             .to_owned();
 
         let db = self.db.get();
-        db.execute(db.get_database_backend().build(&delete_statement))
+        let result = db
+            .execute(db.get_database_backend().build(&delete_statement))
             .await?;
 
-        Ok(())
+        let affected = result.rows_affected();
+
+        Ok(match affected {
+            1 => Some(()),
+            0 => None,
+            _ => panic!(
+                r#"{} rows were affected by delete when expected 1 or 0"#,
+                affected,
+            ),
+        })
     }
 }
