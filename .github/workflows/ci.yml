@@ -18,6 +18,7 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest, macos-latest]
 
@@ -38,6 +39,7 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest, macos-latest]
 
