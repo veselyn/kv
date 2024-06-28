@@ -1,5 +1,5 @@
 use crate::app::App;
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 use std::io::{self, Write};
 use std::result;
 use thiserror::Error;
@@ -61,6 +61,7 @@ impl Output {
 }
 
 #[derive(Debug, Error)]
+#[error("{message}")]
 pub struct Error {
     pub message: String,
     pub status: u8,
@@ -75,16 +76,6 @@ impl Default for Error {
     }
 }
 
-impl Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if !self.message.is_empty() {
-            write!(f, "Error: {}", self.message)?;
-            writeln!(f)?;
-        }
-        Ok(())
-    }
-}
-
 impl Error {
     pub fn dump(&self) {
         self.dump_to(&mut std::io::stderr())
@@ -94,7 +85,18 @@ impl Error {
     where
         W: Write,
     {
-        write!(writer, "{}", self).expect("dumping error");
+        self.try_dump_to(writer).expect("dumping error");
+    }
+
+    fn try_dump_to<W>(&self, writer: &mut W) -> io::Result<()>
+    where
+        W: Write,
+    {
+        if !self.message.is_empty() {
+            write!(writer, "Error: {}", self.message)?;
+            writeln!(writer)?;
+        }
+        Ok(())
     }
 
     pub fn message(mut self, message: String) -> Self {
