@@ -11,7 +11,7 @@ pub struct App {
 }
 
 impl App {
-    pub async fn new() -> Result<Self, NewError> {
+    pub async fn new() -> Result<Self, Error> {
         env_logger::init();
 
         let config = Config::new()?;

@@ -2,7 +2,7 @@ use crate::database;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum NewError {
+pub enum Error {
     #[error("creating config: {0}")]
     Config(#[from] ConfigError),
     #[error("initializing database: {0}")]
