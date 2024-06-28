@@ -7,7 +7,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn try_default() -> Result<Self, ConfigError> {
+    pub fn new() -> Result<Self, ConfigError> {
         let data_dir = dirs::data_dir().ok_or(ConfigError::GetDataDir)?;
         let db_dir = data_dir.join("kv");
         let db_path = db_dir.join("db");

@@ -14,7 +14,7 @@ impl App {
     pub async fn new() -> Result<Self, NewError> {
         env_logger::init();
 
-        let config = Config::try_default()?;
+        let config = Config::new()?;
 
         let db = Database::new(config.db_path).await?;
 
