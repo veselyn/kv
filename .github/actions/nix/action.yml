@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Install Nix
-      uses: cachix/install-nix-action@v27
+      uses: nixbuild/nix-quick-install-action@v28
 
     - name: Cache Nix store
       uses: nix-community/cache-nix-action@v5
