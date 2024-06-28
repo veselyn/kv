@@ -4,7 +4,7 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum NewError {
     #[error("creating config: {0}")]
-    CreateConfig(#[from] ConfigError),
+    Config(#[from] ConfigError),
     #[error("initializing database: {0}")]
     Database(#[from] database::Error),
 }
