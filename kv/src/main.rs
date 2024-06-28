@@ -2,6 +2,7 @@ mod app;
 mod cli;
 mod database;
 mod json;
+mod jsonformat;
 
 use clap::Parser;
 use cli::Cli;

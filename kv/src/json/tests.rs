@@ -72,40 +72,12 @@ async fn validates_json() -> anyhow::Result<()> {
 }
 
 #[async_std::test]
-async fn formats_json() -> anyhow::Result<()> {
+async fn minifies_json() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", r#"{"key":"value"}"#).await?;
+    service.set("key", r#" {  "key"   : "value"  }   "#).await?;
 
-    assert_eq!(
-        r#"{
-    "key": "value"
-}"#,
-        service.get("key").await?,
-    );
-
-    Ok(())
-}
-
-#[async_std::test]
-async fn maintains_order() -> anyhow::Result<()> {
-    let service = Service::default();
-
-    service
-        .set(
-            "key",
-            r#"{"z_key":"value","A_key":"value","a_key":"value"}"#,
-        )
-        .await?;
-
-    assert_eq!(
-        r#"{
-    "z_key": "value",
-    "A_key": "value",
-    "a_key": "value"
-}"#,
-        service.get("key").await?,
-    );
+    assert_eq!(r#"{"key":"value"}"#, service.get("key").await?);
 
     Ok(())
 }
