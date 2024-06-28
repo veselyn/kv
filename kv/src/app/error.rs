@@ -1,6 +1,5 @@
-use thiserror::Error;
-
 use crate::database;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
