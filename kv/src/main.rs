@@ -1,5 +1,5 @@
 use clap::Parser;
-use kv::cli::Cli;
+use kv::Cli;
 use std::process::ExitCode;
 
 #[async_std::main]
