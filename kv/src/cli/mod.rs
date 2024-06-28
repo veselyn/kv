@@ -24,6 +24,10 @@ impl Cli {
             Err(err) => return Err(command::Error::default().message(err.to_string())),
         };
 
+        self.run_with(app).await
+    }
+
+    pub async fn run_with(self, app: App) -> command::Result {
         match self.command {
             Command::Json(command) => command.execute(app).await,
         }
