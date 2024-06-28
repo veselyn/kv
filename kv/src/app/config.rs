@@ -1,7 +1,7 @@
+use super::ConfigError;
 use std::path::PathBuf;
 
-use super::ConfigError;
-
+#[derive(Debug)]
 pub struct Config {
     pub db_path: PathBuf,
 }
