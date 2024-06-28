@@ -27,16 +27,6 @@ pub struct Builder {
 }
 
 impl Builder {
-    pub fn _config(mut self, config: Config) -> Self {
-        self.config = Some(config);
-        self
-    }
-
-    pub fn _db(mut self, db: Database) -> Self {
-        self.db = Some(db);
-        self
-    }
-
     pub async fn build(self) -> Result<App, Error> {
         env_logger::init();
 
@@ -53,5 +43,15 @@ impl Builder {
         Ok(App {
             json: json::Service::new(json::Repository::new(db)),
         })
+    }
+
+    pub fn config(mut self, config: Config) -> Self {
+        self.config = Some(config);
+        self
+    }
+
+    pub fn db(mut self, db: Database) -> Self {
+        self.db = Some(db);
+        self
     }
 }
