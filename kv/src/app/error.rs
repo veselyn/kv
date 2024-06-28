@@ -1,4 +1,4 @@
-use super::config;
+use crate::config;
 use crate::database;
 use thiserror::Error;
 

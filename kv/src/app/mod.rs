@@ -1,8 +1,7 @@
-mod config;
 mod error;
 
+use super::config::Config;
 use crate::{database::Database, json};
-use config::Config;
 pub use error::*;
 
 #[derive(Debug)]
