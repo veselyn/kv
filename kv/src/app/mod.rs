@@ -2,7 +2,7 @@ mod config;
 mod error;
 
 use crate::{database::Database, json};
-pub use config::*;
+use config::Config;
 pub use error::*;
 
 #[derive(Debug)]

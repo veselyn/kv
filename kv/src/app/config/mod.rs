@@ -1,4 +1,6 @@
-use super::ConfigError;
+mod error;
+
+pub use error::*;
 use std::path::PathBuf;
 
 #[derive(Debug)]
@@ -7,7 +9,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Result<Self, ConfigError> {
+    pub fn new() -> Result<Self, Error> {
         Self::builder().build()
     }
 
@@ -22,11 +24,11 @@ pub struct Builder {
 }
 
 impl Builder {
-    pub fn build(self) -> Result<Config, ConfigError> {
+    pub fn build(self) -> Result<Config, Error> {
         let db_path = match self.db_path {
             Some(db_path) => db_path,
             None => {
-                let data_dir = dirs::data_dir().ok_or(ConfigError::GetDataDir)?;
+                let data_dir = dirs::data_dir().ok_or(Error::GetDataDir)?;
                 let db_dir = data_dir.join("kv");
                 db_dir.join("db")
             }
