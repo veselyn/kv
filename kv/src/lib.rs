@@ -1,5 +1,7 @@
-pub mod app;
-pub mod cli;
-pub mod database;
-pub mod json;
-pub mod jsonformat;
+mod app;
+mod cli;
+mod database;
+mod json;
+mod jsonformat;
+
+pub use cli::{Cli, Result};
