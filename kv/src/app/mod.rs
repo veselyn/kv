@@ -15,7 +15,7 @@ impl App {
         Self::builder().build().await
     }
 
-    fn builder() -> Builder {
+    pub fn builder() -> Builder {
         Builder::default()
     }
 }
