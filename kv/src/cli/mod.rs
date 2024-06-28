@@ -4,6 +4,7 @@ mod json;
 use crate::app::App;
 use clap::{Parser, Subcommand};
 use command::Execute;
+pub use command::Result;
 
 #[derive(Parser, Debug)]
 pub struct Cli {
