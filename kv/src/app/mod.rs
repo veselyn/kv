@@ -16,24 +16,7 @@ impl App {
 
         let config = Config::try_default()?;
 
-        std::fs::create_dir_all(
-            config
-                .db_path
-                .parent()
-                .ok_or_else(|| NewError::InvalidDbPath(config.db_path.clone()))?,
-        )
-        .map_err(NewError::CreateKvDir)?;
-
-        std::fs::File::options()
-            .create(true)
-            .truncate(false)
-            .append(true)
-            .open(&config.db_path)
-            .map_err(NewError::CreateDbFile)?;
-
-        let db_url = format!("sqlite://{}", config.db_path.display());
-
-        let db = Database::connect_and_migrate(db_url).await?;
+        let db = Database::new(config.db_path).await?;
 
         Ok(Self {
             json: json::Service::new(json::Repository::new(db)),
