@@ -1,6 +1,7 @@
 use super::command::{self, Execute};
 use crate::app::App;
 use crate::json::{DelError, GetError, SetError};
+use crate::jsonformat::format;
 use clap::{Args, Subcommand};
 
 #[derive(Subcommand, Debug)]
@@ -33,16 +34,21 @@ impl Execute for GetCommand {
         app.json
             .get(self.key)
             .await
-            .map(|value| command::Output::default().stdout(value))
+            .map(|value| -> command::Result {
+                let formatted = format(value).map_err(|err| {
+                    command::Error::default().message(format!("formatting value: {}", err))
+                })?;
+
+                Ok(command::Output::default().stdout(formatted))
+            })
             .map_err(|err| {
                 command::Error::default().message(match err {
                     GetError::KeyNotFound(key) => {
                         format!(r#"key "{}" not found"#, key)
                     }
-                    GetError::Format(_) => err.to_string(),
                     GetError::Repository(_) => err.to_string(),
                 })
-            })
+            })?
     }
 }
 
