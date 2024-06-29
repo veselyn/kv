@@ -112,7 +112,7 @@ impl Error {
 }
 
 pub trait Execute {
-    async fn execute(self, app: App) -> Result;
+    async fn execute(self, app: &App) -> Result;
 }
 
 #[cfg(test)]

@@ -15,7 +15,7 @@ pub enum Command {
 }
 
 impl Execute for Command {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         match self {
             Self::Get(command) => command.execute(app).await,
             Self::Set(command) => command.execute(app).await,
@@ -30,7 +30,7 @@ pub struct GetCommand {
 }
 
 impl Execute for GetCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .get(self.key)
             .await
@@ -59,7 +59,7 @@ pub struct SetCommand {
 }
 
 impl Execute for SetCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .set(self.key, self.value)
             .await
@@ -79,7 +79,7 @@ pub struct DelCommand {
 }
 
 impl Execute for DelCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .del(self.key)
             .await
