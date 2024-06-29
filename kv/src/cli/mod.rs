@@ -26,7 +26,7 @@ impl Cli {
         };
 
         match self.command {
-            Command::Json(command) => command.execute(app).await,
+            Command::Json(command) => command.execute(&app).await,
         }
     }
 }
