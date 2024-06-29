@@ -3,9 +3,12 @@ description: Reusable action that executes all the necessary steps to install Ni
 runs:
   using: composite
   steps:
-    - name: Nix Flake Checker
-      uses: DeterminateSystems/flake-checker-action@v5
-    - name: Nix Installer
-      uses: DeterminateSystems/nix-installer-action@v10
-    - name: Nix Magic Cache
-      uses: DeterminateSystems/magic-nix-cache-action@v4
+    - name: Install Nix
+      uses: nixbuild/nix-quick-install-action@v28
+
+    - name: Cache Nix store
+      uses: nix-community/cache-nix-action@v5
+      with:
+        primary-key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('**/*.nix') }}
+        restore-prefixes-first-match: ${{ github.job }}-${{ runner.os }}-
+        save-always: true
