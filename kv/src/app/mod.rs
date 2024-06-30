@@ -7,6 +7,7 @@ pub use error::*;
 #[derive(Debug)]
 pub struct App {
     pub json: json::Service,
+    config: Config,
 }
 
 impl App {
@@ -16,6 +17,10 @@ impl App {
 
     pub fn builder() -> Builder {
         Builder::default()
+    }
+
+    pub fn config(&self) -> &Config {
+        &self.config
     }
 }
 
@@ -34,11 +39,12 @@ impl Builder {
 
         let db = match self.db {
             Some(db) => db,
-            None => Database::new(config.db_path).await?,
+            None => Database::new(&config.db_path).await?,
         };
 
         Ok(App {
             json: json::Service::new(json::Repository::new(db)),
+            config,
         })
     }
 
