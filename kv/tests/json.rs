@@ -24,13 +24,13 @@ async fn formats_output_with_jq() -> anyhow::Result<()> {
         .await?;
 
     let mut jq = Command::new("jq")
+        .env("JQ_COLORS", "0;90:0;39:0;39:0;39:0;32:1;39:1;39:34;1")
         .arg("--join-output")
         .arg("--color-output")
         .args(["--indent", "4"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .env("JQ_COLORS", "0;90:0;39:0;39:0;39:0;32:1;39:1;39:34;1")
         .spawn()?;
 
     jq.stdin
