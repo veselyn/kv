@@ -1,7 +1,7 @@
 mod app;
 mod cli;
 mod database;
+mod jq;
 mod json;
-mod jsonformat;
 
 pub use cli::{Cli, Result};

@@ -1,7 +1,7 @@
 use super::command::{self, Execute};
 use crate::app::App;
+use crate::jq;
 use crate::json::{DelError, GetError, SetError};
-use crate::jsonformat::format;
 use clap::{Args, Subcommand};
 
 #[derive(Subcommand, Debug)]
@@ -35,7 +35,7 @@ impl Execute for GetCommand {
             .get(self.key)
             .await
             .map(|value| -> command::Result {
-                let formatted = format(value).map_err(|err| {
+                let formatted = jq::format(value).map_err(|err| {
                     command::Error::default().message(format!("formatting value: {}", err))
                 })?;
 
