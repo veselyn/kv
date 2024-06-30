@@ -4,6 +4,8 @@ use std::process::ExitCode;
 
 #[async_std::main]
 async fn main() -> ExitCode {
+    env_logger::init();
+
     Cli::parse()
         .run()
         .await

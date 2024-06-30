@@ -27,8 +27,6 @@ pub struct Builder {
 
 impl Builder {
     pub async fn build(self) -> Result<App, Error> {
-        env_logger::init();
-
         let config = match self.config {
             Some(config) => config,
             None => Config::new()?,
