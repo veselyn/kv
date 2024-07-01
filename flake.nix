@@ -117,6 +117,10 @@
             processes = with pkgs; {
               readme.exec = "${python3Packages.grip}/bin/grip";
             };
+
+            scripts = {
+              clippy.exec = "cargo clippy --all-targets --all-features -- -D warnings";
+            };
           }
         ];
       };
