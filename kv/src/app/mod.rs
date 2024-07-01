@@ -1,36 +1,74 @@
 mod error;
 
-use crate::{database::Database, json};
+use super::config::Config;
+use crate::{database::Database, env::Env, json};
 pub use error::*;
 
 #[derive(Debug)]
 pub struct App {
     pub json: json::Service,
+    env: Env,
+    config: Config,
 }
 
 impl App {
-    pub async fn init() -> Result<Self, InitError> {
-        env_logger::init();
+    pub async fn new() -> Result<Self, Error> {
+        Self::builder().build().await
+    }
 
-        let data_dir = dirs::data_dir().ok_or(InitError::GetDataDir)?;
+    pub fn builder() -> Builder {
+        Builder::default()
+    }
 
-        let db_dir = data_dir.join("kv");
-        std::fs::create_dir_all(&db_dir).map_err(InitError::CreateKvDir)?;
+    pub fn env(&self) -> &Env {
+        &self.env
+    }
 
-        let db_path = db_dir.join("db");
-        std::fs::File::options()
-            .create(true)
-            .truncate(false)
-            .append(true)
-            .open(&db_path)
-            .map_err(InitError::CreateDbFile)?;
+    pub fn config(&self) -> &Config {
+        &self.config
+    }
+}
 
-        let db_url = format!("sqlite://{}", db_path.display());
+#[derive(Debug, Default)]
+pub struct Builder {
+    env: Option<Env>,
+    config: Option<Config>,
+    db: Option<Database>,
+}
 
-        let db = Database::connect_and_migrate(db_url).await?;
+impl Builder {
+    pub async fn build(self) -> Result<App, Error> {
+        let env = self.env.unwrap_or_default();
 
-        Ok(Self {
+        let config = match self.config {
+            Some(config) => config,
+            None => Config::new()?,
+        };
+
+        let db = match self.db {
+            Some(db) => db,
+            None => Database::new(&config.db_path).await?,
+        };
+
+        Ok(App {
             json: json::Service::new(json::Repository::new(db)),
+            env,
+            config,
         })
+    }
+
+    pub fn env(mut self, env: Env) -> Self {
+        self.env = Some(env);
+        self
+    }
+
+    pub fn config(mut self, config: Config) -> Self {
+        self.config = Some(config);
+        self
+    }
+
+    pub fn db(mut self, db: Database) -> Self {
+        self.db = Some(db);
+        self
     }
 }

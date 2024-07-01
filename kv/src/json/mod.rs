@@ -1,9 +1,7 @@
 mod error;
-mod format;
 mod repository;
 
 pub use error::*;
-use format::format;
 pub use repository::Repository;
 
 #[cfg_attr(test, derive(Default))]
@@ -25,9 +23,8 @@ impl Service {
 
         let result = self.repository.get(&key).await?;
         let value = result.ok_or_else(|| GetError::KeyNotFound(key))?;
-        let formatted = format(value)?;
 
-        Ok(formatted)
+        Ok(value)
     }
 
     pub async fn set<S>(&self, key: S, value: S) -> Result<(), SetError>

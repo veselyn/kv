@@ -1,18 +1,19 @@
-mod app;
-mod cli;
-mod database;
-mod json;
-
 use clap::Parser;
-use cli::Cli;
+use kv::Cli;
 use std::process::ExitCode;
 
 #[async_std::main]
 async fn main() -> ExitCode {
-    Cli::parse()
-        .run()
-        .await
-        .inspect(|output| output.dump())
-        .inspect_err(|err| err.dump())
-        .map_or_else(|err| err.status.into(), |_| ExitCode::SUCCESS)
+    env_logger::init();
+
+    match Cli::parse().run().await {
+        Ok(output) => {
+            output.dump().await;
+            ExitCode::SUCCESS
+        }
+        Err(err) => {
+            err.dump().await;
+            ExitCode::from(err.status)
+        }
+    }
 }

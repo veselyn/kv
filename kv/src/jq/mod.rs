@@ -18,8 +18,9 @@ where
         jq_sys::jv_dumpf(
             jv,
             memstream.file as *mut jq_sys::FILE,
-            (jq_sys::jv_print_flags_JV_PRINT_PRETTY | jq_sys::jv_print_flags_JV_PRINT_SPACE2)
-                as i32,
+            (jq_sys::jv_print_flags_JV_PRINT_COLOR
+                | jq_sys::jv_print_flags_JV_PRINT_PRETTY
+                | jq_sys::jv_print_flags_JV_PRINT_SPACE2) as i32,
         );
         log::trace!(memstream:?; "dumped jv to memstream");
     };

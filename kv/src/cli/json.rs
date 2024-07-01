@@ -1,5 +1,6 @@
 use super::command::{self, Execute};
 use crate::app::App;
+use crate::jq;
 use crate::json::{DelError, GetError, SetError};
 use clap::{Args, Subcommand};
 
@@ -14,7 +15,7 @@ pub enum Command {
 }
 
 impl Execute for Command {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         match self {
             Self::Get(command) => command.execute(app).await,
             Self::Set(command) => command.execute(app).await,
@@ -29,20 +30,25 @@ pub struct GetCommand {
 }
 
 impl Execute for GetCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .get(self.key)
             .await
-            .map(|value| command::Output::default().stdout(value))
+            .map(|value| -> command::Result {
+                let formatted = jq::format(value).map_err(|err| {
+                    command::Error::from(app.env()).message(format!("formatting value: {}", err))
+                })?;
+
+                Ok(command::Output::from(app.env()).stdout(formatted))
+            })
             .map_err(|err| {
-                command::Error::default().message(match err {
+                command::Error::from(app.env()).message(match err {
                     GetError::KeyNotFound(key) => {
                         format!(r#"key "{}" not found"#, key)
                     }
-                    GetError::Format(_) => err.to_string(),
                     GetError::Repository(_) => err.to_string(),
                 })
-            })
+            })?
     }
 }
 
@@ -53,13 +59,13 @@ pub struct SetCommand {
 }
 
 impl Execute for SetCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .set(self.key, self.value)
             .await
-            .map(|_| command::Output::default())
+            .map(|_| command::Output::from(app.env()))
             .map_err(|err| {
-                command::Error::default().message(match err {
+                command::Error::from(app.env()).message(match err {
                     SetError::InvalidJson(_) => "invalid JSON".to_owned(),
                     SetError::Repository(_) => err.to_string(),
                 })
@@ -73,13 +79,13 @@ pub struct DelCommand {
 }
 
 impl Execute for DelCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .del(self.key)
             .await
-            .map(|_| command::Output::default())
+            .map(|_| command::Output::from(app.env()))
             .map_err(|err| {
-                command::Error::default().message(match err {
+                command::Error::from(app.env()).message(match err {
                     DelError::KeyNotFound(key) => {
                         format!(r#"key "{}" not found"#, key)
                     }
