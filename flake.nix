@@ -85,6 +85,7 @@
             packages = with pkgs;
               [
                 git
+                jq
                 sea-orm-cli
                 treefmtModule.config.build.wrapper
               ]
