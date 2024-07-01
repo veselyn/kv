@@ -9,8 +9,8 @@ pub type Result = result::Result<Output, Error>;
 
 #[derive(Debug)]
 pub struct Output {
-    pub stdout: String,
-    pub stderr: String,
+    stdout: String,
+    stderr: String,
     env: Env,
 }
 
