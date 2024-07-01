@@ -6,10 +6,14 @@ use std::process::ExitCode;
 async fn main() -> ExitCode {
     env_logger::init();
 
-    Cli::parse()
-        .run()
-        .await
-        .inspect(|output| output.dump())
-        .inspect_err(|err| err.dump())
-        .map_or_else(|err| err.status.into(), |_| ExitCode::SUCCESS)
+    match Cli::parse().run().await {
+        Ok(output) => {
+            output.dump().await;
+            ExitCode::SUCCESS
+        }
+        Err(err) => {
+            err.dump().await;
+            ExitCode::from(err.status)
+        }
+    }
 }

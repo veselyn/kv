@@ -1,7 +1,7 @@
 mod command;
 mod json;
 
-use crate::app::App;
+use crate::{app::App, config::Config, env::Env};
 use clap::{Parser, Subcommand};
 use command::Execute;
 pub use command::Result;
@@ -20,10 +20,17 @@ pub enum Command {
 
 impl Cli {
     pub async fn run(self) -> command::Result {
-        let app = match App::new().await {
-            Ok(app) => app,
-            Err(err) => return Err(command::Error::default().message(err.to_string())),
-        };
+        let env = Env::new();
+
+        let config =
+            Config::new().map_err(|err| command::Error::from(&env).message(err.to_string()))?;
+
+        let app = App::builder()
+            .env(env.clone())
+            .config(config)
+            .build()
+            .await
+            .map_err(|err| command::Error::from(env).message(err.to_string()))?;
 
         self.run_with(&app).await
     }

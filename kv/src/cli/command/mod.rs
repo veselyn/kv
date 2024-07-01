@@ -1,50 +1,35 @@
 use crate::app::App;
+use crate::env::Env;
 use std::fmt::Debug;
-use std::io::{self, Write};
+use std::io;
 use std::result;
 use thiserror::Error;
 
 pub type Result = result::Result<Output, Error>;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct Output {
     pub stdout: String,
     pub stderr: String,
+    env: Env,
 }
 
 impl Output {
-    pub fn dump(&self) {
-        self.dump_to(&mut std::io::stdout(), &mut std::io::stderr());
+    pub async fn dump(&self) {
+        self.try_dump().await.expect("dumping output");
     }
 
-    pub fn dump_to<O, E>(&self, stdout: &mut O, stderr: &mut E)
-    where
-        O: Write,
-        E: Write,
-    {
-        self.dump_stdout(stdout).expect("dumping result stdout");
-        self.dump_stderr(stderr).expect("dumping result stderr");
-    }
-
-    fn dump_stdout<W>(&self, writer: &mut W) -> io::Result<()>
-    where
-        W: Write,
-    {
+    async fn try_dump(&self) -> io::Result<()> {
         if !self.stdout.is_empty() {
-            write!(writer, "{}", self.stdout)?;
-            writeln!(writer)?;
+            write!(self.env.stdout.lock().await, "{}", self.stdout)?;
+            writeln!(self.env.stdout.lock().await)?;
         }
-        Ok(())
-    }
 
-    fn dump_stderr<W>(&self, writer: &mut W) -> io::Result<()>
-    where
-        W: Write,
-    {
         if !self.stderr.is_empty() {
-            write!(writer, "{}", self.stderr)?;
-            writeln!(writer)?;
+            write!(self.env.stderr.lock().await, "{}", self.stderr)?;
+            writeln!(self.env.stderr.lock().await)?;
         }
+
         Ok(())
     }
 
@@ -60,41 +45,55 @@ impl Output {
     }
 }
 
+impl From<Env> for Output {
+    fn from(value: Env) -> Self {
+        Self {
+            stdout: "".to_owned(),
+            stderr: "".to_owned(),
+            env: value,
+        }
+    }
+}
+
+impl From<&Env> for Output {
+    fn from(value: &Env) -> Self {
+        Self::from(value.clone())
+    }
+}
+
 #[derive(Debug, Error)]
 #[error("{message}")]
 pub struct Error {
     pub message: String,
     pub status: u8,
+    env: Env,
 }
 
-impl Default for Error {
-    fn default() -> Self {
+impl From<Env> for Error {
+    fn from(value: Env) -> Self {
         Self {
             message: "Something went wrong".to_owned(),
             status: 1,
+            env: value,
         }
     }
 }
 
+impl From<&Env> for Error {
+    fn from(value: &Env) -> Self {
+        Self::from(value.clone())
+    }
+}
+
 impl Error {
-    pub fn dump(&self) {
-        self.dump_to(&mut std::io::stderr())
+    pub async fn dump(&self) {
+        self.try_dump().await.expect("dumping error");
     }
 
-    pub fn dump_to<W>(&self, writer: &mut W)
-    where
-        W: Write,
-    {
-        self.try_dump_to(writer).expect("dumping error");
-    }
-
-    fn try_dump_to<W>(&self, writer: &mut W) -> io::Result<()>
-    where
-        W: Write,
-    {
+    async fn try_dump(&self) -> io::Result<()> {
         if !self.message.is_empty() {
-            write!(writer, "Error: {}", self.message)?;
-            writeln!(writer)?;
+            write!(self.env.stderr.lock().await, "Error: {}", self.message)?;
+            writeln!(self.env.stderr.lock().await)?;
         }
         Ok(())
     }

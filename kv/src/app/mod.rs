@@ -38,7 +38,7 @@ pub struct Builder {
 
 impl Builder {
     pub async fn build(self) -> Result<App, Error> {
-        let env = self.env.unwrap_or_else(Env::new);
+        let env = self.env.unwrap_or_default();
 
         let config = match self.config {
             Some(config) => config,

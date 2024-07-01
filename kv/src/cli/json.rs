@@ -36,13 +36,13 @@ impl Execute for GetCommand {
             .await
             .map(|value| -> command::Result {
                 let formatted = jq::format(value).map_err(|err| {
-                    command::Error::default().message(format!("formatting value: {}", err))
+                    command::Error::from(app.env()).message(format!("formatting value: {}", err))
                 })?;
 
-                Ok(command::Output::default().stdout(formatted))
+                Ok(command::Output::from(app.env()).stdout(formatted))
             })
             .map_err(|err| {
-                command::Error::default().message(match err {
+                command::Error::from(app.env()).message(match err {
                     GetError::KeyNotFound(key) => {
                         format!(r#"key "{}" not found"#, key)
                     }
@@ -63,9 +63,9 @@ impl Execute for SetCommand {
         app.json
             .set(self.key, self.value)
             .await
-            .map(|_| command::Output::default())
+            .map(|_| command::Output::from(app.env()))
             .map_err(|err| {
-                command::Error::default().message(match err {
+                command::Error::from(app.env()).message(match err {
                     SetError::InvalidJson(_) => "invalid JSON".to_owned(),
                     SetError::Repository(_) => err.to_string(),
                 })
@@ -83,9 +83,9 @@ impl Execute for DelCommand {
         app.json
             .del(self.key)
             .await
-            .map(|_| command::Output::default())
+            .map(|_| command::Output::from(app.env()))
             .map_err(|err| {
-                command::Error::default().message(match err {
+                command::Error::from(app.env()).message(match err {
                     DelError::KeyNotFound(key) => {
                         format!(r#"key "{}" not found"#, key)
                     }
