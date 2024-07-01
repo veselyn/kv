@@ -14,36 +14,22 @@ pub struct Output {
 
 impl Output {
     pub fn dump(&self) {
-        self.dump_to(&mut std::io::stdout(), &mut std::io::stderr());
+        self.dump_to(&mut std::io::stdout(), &mut std::io::stderr())
+            .expect("dumping output");
     }
 
-    pub fn dump_to<O, E>(&self, stdout: &mut O, stderr: &mut E)
+    fn dump_to<O, E>(&self, stdout: &mut O, stderr: &mut E) -> io::Result<()>
     where
         O: Write,
         E: Write,
     {
-        self.dump_stdout(stdout).expect("dumping result stdout");
-        self.dump_stderr(stderr).expect("dumping result stderr");
-    }
-
-    fn dump_stdout<W>(&self, writer: &mut W) -> io::Result<()>
-    where
-        W: Write,
-    {
         if !self.stdout.is_empty() {
-            write!(writer, "{}", self.stdout)?;
-            writeln!(writer)?;
+            write!(stdout, "{}", self.stdout)?;
+            writeln!(stdout)?;
         }
-        Ok(())
-    }
-
-    fn dump_stderr<W>(&self, writer: &mut W) -> io::Result<()>
-    where
-        W: Write,
-    {
         if !self.stderr.is_empty() {
-            write!(writer, "{}", self.stderr)?;
-            writeln!(writer)?;
+            write!(stderr, "{}", self.stderr)?;
+            writeln!(stderr)?;
         }
         Ok(())
     }
@@ -78,17 +64,10 @@ impl Default for Error {
 
 impl Error {
     pub fn dump(&self) {
-        self.dump_to(&mut std::io::stderr())
+        self.dump_to(&mut std::io::stderr()).expect("dumping error");
     }
 
-    pub fn dump_to<W>(&self, writer: &mut W)
-    where
-        W: Write,
-    {
-        self.try_dump_to(writer).expect("dumping error");
-    }
-
-    fn try_dump_to<W>(&self, writer: &mut W) -> io::Result<()>
+    fn dump_to<W>(&self, writer: &mut W) -> io::Result<()>
     where
         W: Write,
     {

@@ -7,7 +7,7 @@ fn output_dumps_stdout() {
 
     let mut stdout = vec![];
     let mut stderr = vec![];
-    output.dump_to(&mut stdout, &mut stderr);
+    output.dump_to(&mut stdout, &mut stderr).unwrap();
 
     assert_eq!(Ok("stdout\n".to_owned()), String::from_utf8(stdout));
     assert_eq!(Ok("".to_owned()), String::from_utf8(stderr));
@@ -19,7 +19,7 @@ fn output_dumps_stderr() {
 
     let mut stdout = vec![];
     let mut stderr = vec![];
-    output.dump_to(&mut stdout, &mut stderr);
+    output.dump_to(&mut stdout, &mut stderr).unwrap();
 
     assert_eq!(Ok("".to_owned()), String::from_utf8(stdout));
     assert_eq!(Ok("stderr\n".to_owned()), String::from_utf8(stderr));
@@ -33,7 +33,7 @@ fn output_dumps_both() {
 
     let mut stdout = vec![];
     let mut stderr = vec![];
-    output.dump_to(&mut stdout, &mut stderr);
+    output.dump_to(&mut stdout, &mut stderr).unwrap();
 
     assert_eq!(Ok("stdout\n".to_owned()), String::from_utf8(stdout));
     assert_eq!(Ok("stderr\n".to_owned()), String::from_utf8(stderr));
@@ -44,7 +44,7 @@ fn error_dumps_message() {
     let error = Error::default().message("message".to_owned());
 
     let mut message = vec![];
-    error.dump_to(&mut message);
+    error.dump_to(&mut message).unwrap();
 
     assert_eq!(
         Ok("Error: message\n".to_owned()),
