@@ -120,7 +120,8 @@
             };
 
             scripts = {
-              clippy.exec = "cargo clippy --all-targets --all-features -- -D warnings";
+              clippy.exec = "cargo clippy -- -D warnings";
+              clippy-all.exec = "cargo clippy --all-targets --all-features -- -D warnings";
             };
           }
         ];
