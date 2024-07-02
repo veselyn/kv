@@ -1,47 +1,54 @@
 use crate::app::App;
-use std::fmt::Debug;
-use std::io::{self, Write};
+use std::io::{self, Read, Write};
 use std::result;
 use thiserror::Error;
 
 pub type Result = result::Result<Output, Error>;
 
-#[derive(Default, Debug)]
 pub struct Output {
-    pub stdout: String,
-    pub stderr: String,
+    stdout: Box<dyn Read>,
+    stderr: Box<dyn Read>,
+}
+
+impl Default for Output {
+    fn default() -> Self {
+        Self {
+            stdout: Box::new(io::empty()),
+            stderr: Box::new(io::empty()),
+        }
+    }
 }
 
 impl Output {
-    pub fn dump(&self) {
-        self.dump_to(&mut std::io::stdout(), &mut std::io::stderr())
+    pub fn dump(&mut self) {
+        self.dump_to(&mut io::stdout(), &mut io::stderr())
             .expect("dumping output");
     }
 
-    fn dump_to<O, E>(&self, stdout: &mut O, stderr: &mut E) -> io::Result<()>
+    fn dump_to<O, E>(&mut self, stdout: &mut O, stderr: &mut E) -> io::Result<()>
     where
         O: Write,
         E: Write,
     {
-        if !self.stdout.is_empty() {
-            write!(stdout, "{}", self.stdout)?;
+        let bytes_copied = io::copy(&mut self.stdout, stdout)?;
+        if bytes_copied > 0 {
             writeln!(stdout)?;
         }
-        if !self.stderr.is_empty() {
-            write!(stderr, "{}", self.stderr)?;
+        let bytes_copied = io::copy(&mut self.stderr, stderr)?;
+        if bytes_copied > 0 {
             writeln!(stderr)?;
         }
         Ok(())
     }
 
-    pub fn stdout(mut self, stdout: String) -> Self {
-        self.stdout = stdout;
+    pub fn stdout<O: Read + 'static>(mut self, stdout: O) -> Self {
+        self.stdout = Box::new(stdout);
         self
     }
 
     #[allow(dead_code)]
-    pub fn stderr(mut self, stderr: String) -> Self {
-        self.stderr = stderr;
+    pub fn stderr<E: Read + 'static>(mut self, stderr: E) -> Self {
+        self.stderr = Box::new(stderr);
         self
     }
 }
@@ -49,7 +56,7 @@ impl Output {
 #[derive(Debug, Error)]
 #[error("{message}")]
 pub struct Error {
-    pub message: String,
+    message: String,
     pub status: u8,
 }
 
@@ -64,7 +71,7 @@ impl Default for Error {
 
 impl Error {
     pub fn dump(&self) {
-        self.dump_to(&mut std::io::stderr()).expect("dumping error");
+        self.dump_to(&mut io::stderr()).expect("dumping error");
     }
 
     fn dump_to<W>(&self, writer: &mut W) -> io::Result<()>

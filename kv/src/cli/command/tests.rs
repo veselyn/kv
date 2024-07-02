@@ -1,9 +1,10 @@
 use super::*;
+use io::Cursor;
 use pretty_assertions::assert_eq;
 
 #[test]
 fn output_dumps_stdout() {
-    let output = Output::default().stdout("stdout".to_owned());
+    let mut output = Output::default().stdout(Cursor::new("stdout"));
 
     let mut stdout = vec![];
     let mut stderr = vec![];
@@ -15,7 +16,7 @@ fn output_dumps_stdout() {
 
 #[test]
 fn output_dumps_stderr() {
-    let output = Output::default().stderr("stderr".to_owned());
+    let mut output = Output::default().stderr(Cursor::new("stderr"));
 
     let mut stdout = vec![];
     let mut stderr = vec![];
@@ -27,9 +28,9 @@ fn output_dumps_stderr() {
 
 #[test]
 fn output_dumps_both() {
-    let output = Output::default()
-        .stdout("stdout".to_owned())
-        .stderr("stderr".to_owned());
+    let mut output = Output::default()
+        .stdout(Cursor::new("stdout"))
+        .stderr(Cursor::new("stderr"));
 
     let mut stdout = vec![];
     let mut stderr = vec![];

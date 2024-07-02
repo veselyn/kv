@@ -3,6 +3,7 @@ use crate::app::App;
 use crate::jq;
 use crate::json::{DelError, GetError, SetError};
 use clap::{Args, Subcommand};
+use std::io::Cursor;
 
 #[derive(Subcommand, Debug)]
 pub enum Command {
@@ -39,7 +40,9 @@ impl Execute for GetCommand {
                     command::Error::default().message(format!("formatting value: {}", err))
                 })?;
 
-                Ok(command::Output::default().stdout(formatted))
+                let output = command::Output::default().stdout(Cursor::new(formatted));
+
+                Ok(output)
             })
             .map_err(|err| {
                 command::Error::default().message(match err {
