@@ -3,18 +3,22 @@ mod error;
 pub use error::*;
 use migration::MigratorTrait;
 use sea_orm::DatabaseConnection;
-use std::{io, path::Path};
+use std::{io, ops::Deref, path::Path};
 
 #[derive(Debug)]
 pub struct Database {
     inner: DatabaseConnection,
 }
 
-impl Database {
-    pub fn get(&self) -> &DatabaseConnection {
+impl Deref for Database {
+    type Target = DatabaseConnection;
+
+    fn deref(&self) -> &Self::Target {
         &self.inner
     }
+}
 
+impl Database {
     pub async fn new<P>(path: P) -> Result<Self, Error>
     where
         P: AsRef<Path>,
@@ -69,7 +73,7 @@ impl Database {
     }
 
     pub async fn migrate(database: &Self) -> Result<(), MigrateError> {
-        migration::Migrator::up(database.get(), None).await?;
+        migration::Migrator::up(&database.inner, None).await?;
         Ok(())
     }
 }
