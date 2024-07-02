@@ -1,7 +1,9 @@
 use super::command::{self, Execute};
 use crate::app::App;
+use crate::jq;
 use crate::json::{DelError, GetError, SetError};
 use clap::{Args, Subcommand};
+use std::io::Cursor;
 
 #[derive(Subcommand, Debug)]
 pub enum Command {
@@ -14,7 +16,7 @@ pub enum Command {
 }
 
 impl Execute for Command {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         match self {
             Self::Get(command) => command.execute(app).await,
             Self::Set(command) => command.execute(app).await,
@@ -29,20 +31,27 @@ pub struct GetCommand {
 }
 
 impl Execute for GetCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .get(self.key)
             .await
-            .map(|value| command::Output::default().stdout(value))
+            .map(|value| -> command::Result {
+                let formatted = jq::format(value).map_err(|err| {
+                    command::Error::default().message(format!("formatting value: {}", err))
+                })?;
+
+                let output = command::Output::default().stdout(Cursor::new(formatted));
+
+                Ok(output)
+            })
             .map_err(|err| {
                 command::Error::default().message(match err {
                     GetError::KeyNotFound(key) => {
                         format!(r#"key "{}" not found"#, key)
                     }
-                    GetError::Format(_) => err.to_string(),
                     GetError::Repository(_) => err.to_string(),
                 })
-            })
+            })?
     }
 }
 
@@ -53,7 +62,7 @@ pub struct SetCommand {
 }
 
 impl Execute for SetCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .set(self.key, self.value)
             .await
@@ -73,7 +82,7 @@ pub struct DelCommand {
 }
 
 impl Execute for DelCommand {
-    async fn execute(self, app: App) -> command::Result {
+    async fn execute(self, app: &App) -> command::Result {
         app.json
             .del(self.key)
             .await

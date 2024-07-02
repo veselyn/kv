@@ -1,68 +1,62 @@
 use crate::app::App;
-use std::fmt::{Debug, Display};
-use std::io::{self, Write};
+use std::io::{self, Read, Write};
 use std::result;
 use thiserror::Error;
 
 pub type Result = result::Result<Output, Error>;
 
-#[derive(Default, Debug)]
 pub struct Output {
-    pub stdout: String,
-    pub stderr: String,
+    stdout: Box<dyn Read>,
+    stderr: Box<dyn Read>,
+}
+
+impl Default for Output {
+    fn default() -> Self {
+        Self {
+            stdout: Box::new(io::empty()),
+            stderr: Box::new(io::empty()),
+        }
+    }
 }
 
 impl Output {
-    pub fn dump(&self) {
-        self.dump_to(&mut std::io::stdout(), &mut std::io::stderr());
+    pub fn dump(&mut self) {
+        self.dump_to(&mut io::stdout(), &mut io::stderr())
+            .expect("dumping output");
     }
 
-    pub fn dump_to<O, E>(&self, stdout: &mut O, stderr: &mut E)
+    fn dump_to<O, E>(&mut self, stdout: &mut O, stderr: &mut E) -> io::Result<()>
     where
         O: Write,
         E: Write,
     {
-        self.dump_stdout(stdout).expect("dumping result stdout");
-        self.dump_stderr(stderr).expect("dumping result stderr");
-    }
-
-    fn dump_stdout<W>(&self, writer: &mut W) -> io::Result<()>
-    where
-        W: Write,
-    {
-        if !self.stdout.is_empty() {
-            write!(writer, "{}", self.stdout)?;
-            writeln!(writer)?;
+        let bytes_copied = io::copy(&mut self.stdout, stdout)?;
+        if bytes_copied > 0 {
+            writeln!(stdout)?;
+        }
+        let bytes_copied = io::copy(&mut self.stderr, stderr)?;
+        if bytes_copied > 0 {
+            writeln!(stderr)?;
         }
         Ok(())
     }
 
-    fn dump_stderr<W>(&self, writer: &mut W) -> io::Result<()>
-    where
-        W: Write,
-    {
-        if !self.stderr.is_empty() {
-            write!(writer, "{}", self.stderr)?;
-            writeln!(writer)?;
-        }
-        Ok(())
-    }
-
-    pub fn stdout(mut self, stdout: String) -> Self {
-        self.stdout = stdout;
+    pub fn stdout<O: Read + 'static>(mut self, stdout: O) -> Self {
+        self.stdout = Box::new(stdout);
         self
     }
 
     #[allow(dead_code)]
-    pub fn stderr(mut self, stderr: String) -> Self {
-        self.stderr = stderr;
+    pub fn stderr<E: Read + 'static>(mut self, stderr: E) -> Self {
+        self.stderr = Box::new(stderr);
         self
     }
 }
 
 #[derive(Debug, Error)]
+#[error("{message}")]
 pub struct Error {
-    pub message: String,
+    message: String,
     pub status: u8,
 }
 
@@ -75,26 +69,20 @@ impl Default for Error {
     }
 }
 
-impl Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if !self.message.is_empty() {
-            write!(f, "Error: {}", self.message)?;
-            writeln!(f)?;
-        }
-        Ok(())
-    }
-}
-
 impl Error {
     pub fn dump(&self) {
-        self.dump_to(&mut std::io::stderr())
+        self.dump_to(&mut io::stderr()).expect("dumping error");
     }
 
-    pub fn dump_to<W>(&self, writer: &mut W)
+    fn dump_to<W>(&self, writer: &mut W) -> io::Result<()>
     where
         W: Write,
     {
-        write!(writer, "{}", self).expect("dumping error");
+        if !self.message.is_empty() {
+            write!(writer, "Error: {}", self.message)?;
+            writeln!(writer)?;
+        }
+        Ok(())
     }
 
     pub fn message(mut self, message: String) -> Self {
@@ -110,7 +98,7 @@ impl Error {
 }
 
 pub trait Execute {
-    async fn execute(self, app: App) -> Result;
+    async fn execute(self, app: &App) -> Result;
 }
 
 #[cfg(test)]
