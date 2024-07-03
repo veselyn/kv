@@ -10,8 +10,6 @@ pub struct App {
 
 impl App {
     pub async fn new() -> Result<Self, Error> {
-        env_logger::init();
-
         let data_dir = dirs::data_dir().ok_or(Error::GetDataDir)?;
 
         let db_dir = data_dir.join("kv");
