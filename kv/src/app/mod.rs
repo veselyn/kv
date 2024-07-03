@@ -10,8 +10,6 @@ pub struct App {
 
 impl App {
     pub async fn new() -> Result<Self, Error> {
-        env_logger::init();
-
         let data_dir = dirs::data_dir().ok_or(Error::GetDataDir)?;
 
         let db_dir = data_dir.join("kv");
@@ -24,8 +22,6 @@ impl App {
             .append(true)
             .open(&db_path)
             .map_err(Error::CreateDbFile)?;
-
-        let db_path = format!("sqlite://{}", db_path.display());
 
         let db = Database::new(db_path).await?;
 
