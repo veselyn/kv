@@ -3,8 +3,6 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("getting os specific data dir")]
-    GetDataDir,
     #[error("creating kv dir in data dir: {0}")]
     CreateKvDir(#[source] std::io::Error),
     #[error("creating db file in kv dir: {0}")]

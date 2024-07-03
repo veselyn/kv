@@ -5,7 +5,7 @@ use crate::json::{DelError, GetError, SetError};
 use clap::{Args, Subcommand};
 use std::io::Cursor;
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Clone)]
 pub enum Command {
     #[command(about = "Get the value of a JSON key")]
     Get(GetCommand),
@@ -25,7 +25,7 @@ impl Execute for Command {
     }
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub struct GetCommand {
     pub key: String,
 }
@@ -55,7 +55,7 @@ impl Execute for GetCommand {
     }
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub struct SetCommand {
     pub key: String,
     pub value: String,
@@ -76,7 +76,7 @@ impl Execute for SetCommand {
     }
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub struct DelCommand {
     pub key: String,
 }
