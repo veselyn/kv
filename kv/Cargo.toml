@@ -19,6 +19,8 @@ log = { version = "0.4.21", features = ["kv", "kv_std"] }
 thiserror = "1.0.58"
 sea-orm = { version = "0.12.15", features = ["sqlx-sqlite", "runtime-async-std-native-tls", "sea-orm-internal", "debug-print"] }
 sea-query = { version = "0.30.7", default-features = false, features = ["sea-query-derive", "derive", "backend-sqlite"] }
+config = "0.14.0"
+serde = { version = "1.0.203", features = ["derive"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"

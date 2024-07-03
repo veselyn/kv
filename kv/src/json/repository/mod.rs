@@ -31,9 +31,9 @@ impl Repository {
             .and_where(key::Column::Id.eq(key.into()))
             .to_owned();
 
-        let db = self.db.get();
-        let result = db
-            .query_one(db.get_database_backend().build(&select_statement))
+        let result = self
+            .db
+            .query_one(self.db.get_database_backend().build(&select_statement))
             .await?;
 
         let value = result
@@ -58,8 +58,8 @@ impl Repository {
             ])
             .to_owned();
 
-        let db = self.db.get();
-        db.execute(db.get_database_backend().build(&insert_statement))
+        self.db
+            .execute(self.db.get_database_backend().build(&insert_statement))
             .await
             .map_err(|db_err| match db_err {
                 DbErr::Exec(RuntimeErr::SqlxError(SqlxError::Database(ref err))) => {
@@ -84,9 +84,9 @@ impl Repository {
             .and_where(key::Column::Id.eq(key.into()))
             .to_owned();
 
-        let db = self.db.get();
-        let result = db
-            .execute(db.get_database_backend().build(&delete_statement))
+        let result = self
+            .db
+            .execute(self.db.get_database_backend().build(&delete_statement))
             .await?;
 
         let affected = result.rows_affected();

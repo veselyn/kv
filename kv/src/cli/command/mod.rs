@@ -46,7 +46,6 @@ impl Output {
         self
     }
 
-    #[allow(dead_code)]
     pub fn stderr<E: Read + 'static>(mut self, stderr: E) -> Self {
         self.stderr = Box::new(stderr);
         self
@@ -90,7 +89,6 @@ impl Error {
         self
     }
 
-    #[allow(dead_code)]
     pub fn status(mut self, status: u8) -> Self {
         self.status = status;
         self

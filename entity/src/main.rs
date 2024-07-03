@@ -2,7 +2,17 @@
 async fn main() -> anyhow::Result<()> {
     let temp_file = tempfile::NamedTempFile::new()?;
     let temp_file_path = temp_file.path();
-    let database_url = format!("sqlite://{}", temp_file_path.display());
+    let database_url = format!(
+        "sqlite://{}",
+        temp_file_path
+            .to_owned()
+            .into_os_string()
+            .into_string()
+            .map_err(|err| anyhow::anyhow!(
+                "invalid temp file path: {}",
+                err.to_string_lossy().to_string()
+            ))?
+    );
 
     sea_orm_cli::run_migrate_command(
         Some(sea_orm_cli::MigrateSubcommands::Fresh),
