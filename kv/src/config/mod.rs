@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub db_path: String,
+    pub database_path: String,
 }
 
 impl Default for Config {
@@ -14,12 +14,12 @@ impl Default for Config {
         let data_dir = dirs::data_dir().expect("getting data dir for os ");
 
         Self {
-            db_path: data_dir
+            database_path: data_dir
                 .join("kv")
                 .join("db")
                 .into_os_string()
                 .into_string()
-                .expect("db_path is not utf8"),
+                .expect("database_path is not utf8"),
         }
     }
 }
@@ -33,10 +33,10 @@ impl config::Source for Config {
         let mut map = config::Map::new();
 
         map.insert(
-            "db_path".to_owned(),
+            "database_path".to_owned(),
             config::Value::new(
                 Some(&"default".to_owned()),
-                config::ValueKind::String(self.db_path.to_owned()),
+                config::ValueKind::String(self.database_path.to_owned()),
             ),
         );
 
