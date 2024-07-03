@@ -4,7 +4,7 @@ use thiserror::Error;
 pub enum Error {
     #[error("input contains nul character: {0}")]
     NulInput(#[from] std::ffi::NulError),
-    #[error("output is not valid utf8: {0}")]
+    #[error("output is not utf8: {0}")]
     InvalidOutput(#[from] std::str::Utf8Error),
     #[error("opening memstream file")]
     OpenMemstreamFile,

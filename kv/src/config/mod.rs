@@ -2,9 +2,9 @@ mod error;
 
 use crate::Cli;
 pub use error::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub database_path: String,
 }
