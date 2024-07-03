@@ -23,8 +23,6 @@ impl App {
             .open(&db_path)
             .map_err(Error::CreateDbFile)?;
 
-        let db_path = format!("sqlite://{}", db_path.display());
-
         let db = Database::new(db_path).await?;
 
         Ok(Self {
