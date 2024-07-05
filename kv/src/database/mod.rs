@@ -60,7 +60,7 @@ impl Database {
     where
         P: AsRef<Path>,
     {
-        let path = path.as_ref().to_str().expect("database path not utf8");
+        let path = path.as_ref().to_str().expect("database path is not utf8");
 
         let uri = match path {
             ":memory:" => "sqlite::memory:".to_owned(),

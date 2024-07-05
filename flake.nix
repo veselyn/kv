@@ -31,8 +31,9 @@
         ++ lib.optional stdenv.isLinux openssl;
 
       entityDeps = with pkgs; lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.SystemConfiguration;
+      testDeps = with pkgs; [jq];
 
-      buildDeps = with pkgs; [pkg-config] ++ jqSysDeps;
+      buildDeps = with pkgs; [pkg-config] ++ testDeps ++ jqSysDeps;
       runtimeDeps = tlsDeps ++ entityDeps;
     in {
       formatter = treefmtModule.config.build.wrapper;
@@ -85,7 +86,6 @@
             packages = with pkgs;
               [
                 git
-                jq
                 sea-orm-cli
                 treefmtModule.config.build.wrapper
               ]
@@ -101,12 +101,13 @@
             pre-commit = {
               hooks = {
                 clippy.enable = true;
+                clippy.settings.allFeatures = true;
                 clippy.settings.denyWarnings = true;
-                treefmt.enable = true;
-                treefmt.package = treefmtModule.config.build.wrapper;
                 test.enable = true;
                 test.entry = "cargo test";
                 test.pass_filenames = false;
+                treefmt.enable = true;
+                treefmt.package = treefmtModule.config.build.wrapper;
               };
             };
 
