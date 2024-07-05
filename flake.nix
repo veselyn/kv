@@ -101,12 +101,13 @@
             pre-commit = {
               hooks = {
                 clippy.enable = true;
+                clippy.settings.allFeatures = true;
                 clippy.settings.denyWarnings = true;
-                treefmt.enable = true;
-                treefmt.package = treefmtModule.config.build.wrapper;
                 test.enable = true;
                 test.entry = "cargo test";
                 test.pass_filenames = false;
+                treefmt.enable = true;
+                treefmt.package = treefmtModule.config.build.wrapper;
               };
             };
 

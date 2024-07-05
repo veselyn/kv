@@ -45,7 +45,7 @@ impl Default for Cli {
     }
 }
 
-type Cmd = Box<dyn Fn() -> Command>;
+pub type Cmd = Box<dyn Fn() -> Command>;
 
 impl From<&Cli> for Cmd {
     fn from(cli: &Cli) -> Self {
