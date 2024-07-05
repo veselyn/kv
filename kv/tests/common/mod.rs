@@ -1,6 +1,7 @@
 pub use assert_cmd::prelude::*;
 use assert_cmd::{crate_name, Command};
 pub use kv::Config;
+use std::fmt::Display;
 use std::fs::File;
 use std::path::PathBuf;
 use tempfile::tempdir;
@@ -64,5 +65,18 @@ impl From<&Cli> for Cmd {
             cmd.args(["--config", &config]);
             cmd
         })
+    }
+}
+
+pub trait Newline {
+    fn nl(&self) -> String;
+}
+
+impl<T> Newline for T
+where
+    T: Into<String> + AsRef<str> + Display,
+{
+    fn nl(&self) -> String {
+        format!("{self}\n")
     }
 }
