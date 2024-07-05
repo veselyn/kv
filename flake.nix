@@ -31,8 +31,9 @@
         ++ lib.optional stdenv.isLinux openssl;
 
       entityDeps = with pkgs; lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.SystemConfiguration;
+      testDeps = with pkgs; [jq];
 
-      buildDeps = with pkgs; [pkg-config] ++ jqSysDeps;
+      buildDeps = with pkgs; [pkg-config] ++ testDeps ++ jqSysDeps;
       runtimeDeps = tlsDeps ++ entityDeps;
     in {
       formatter = treefmtModule.config.build.wrapper;
@@ -85,7 +86,6 @@
             packages = with pkgs;
               [
                 git
-                jq
                 sea-orm-cli
                 treefmtModule.config.build.wrapper
               ]
