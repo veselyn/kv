@@ -15,9 +15,9 @@ impl Service {
         Self { repository }
     }
 
-    pub async fn get<S>(&self, key: S) -> Result<String, GetError>
+    pub async fn get<K>(&self, key: K) -> Result<String, GetError>
     where
-        S: Into<String>,
+        K: Into<String>,
     {
         let key = key.into();
 
@@ -27,9 +27,10 @@ impl Service {
         Ok(value)
     }
 
-    pub async fn set<S>(&self, key: S, value: S) -> Result<(), SetError>
+    pub async fn set<K, V>(&self, key: K, value: V) -> Result<(), SetError>
     where
-        S: Into<String>,
+        K: Into<String>,
+        V: Into<String>,
     {
         self.repository
             .set(key, value)
@@ -42,9 +43,9 @@ impl Service {
         Ok(())
     }
 
-    pub async fn del<S>(&self, key: S) -> Result<(), DelError>
+    pub async fn del<K>(&self, key: K) -> Result<(), DelError>
     where
-        S: Into<String>,
+        K: Into<String>,
     {
         let key = key.into();
 

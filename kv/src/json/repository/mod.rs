@@ -17,9 +17,9 @@ impl Repository {
         Self { db }
     }
 
-    pub async fn get<S>(&self, key: S) -> Result<Option<String>, GetError>
+    pub async fn get<K>(&self, key: K) -> Result<Option<String>, GetError>
     where
-        S: Into<String>,
+        K: Into<String>,
     {
         let select_statement = Query::select()
             .expr_as(
@@ -43,9 +43,10 @@ impl Repository {
         Ok(value)
     }
 
-    pub async fn set<S>(&self, key: S, value: S) -> Result<(), SetError>
+    pub async fn set<K, V>(&self, key: K, value: V) -> Result<(), SetError>
     where
-        S: Into<String>,
+        K: Into<String>,
+        V: Into<String>,
     {
         let insert_statement = Query::insert()
             .replace()
@@ -74,9 +75,9 @@ impl Repository {
         Ok(())
     }
 
-    pub async fn del<S>(&self, key: S) -> Result<Option<()>, DelError>
+    pub async fn del<K>(&self, key: K) -> Result<Option<()>, DelError>
     where
-        S: Into<String>,
+        K: Into<String>,
     {
         let delete_statement = Query::delete()
             .from_table(key::Entity)
