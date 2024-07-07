@@ -2,7 +2,7 @@ use super::*;
 use pretty_assertions::assert_eq;
 
 #[async_std::test]
-async fn sets_and_gets_keys() -> anyhow::Result<()> {
+async fn sets_and_gets_key() -> anyhow::Result<()> {
     let service = Service::default();
 
     assert!(matches!(
@@ -18,7 +18,7 @@ async fn sets_and_gets_keys() -> anyhow::Result<()> {
 }
 
 #[async_std::test]
-async fn replaces_existing_keys() -> anyhow::Result<()> {
+async fn replaces_existing_key() -> anyhow::Result<()> {
     let service = Service::default();
 
     service.set("key", r#""value1""#).await?;
@@ -31,7 +31,7 @@ async fn replaces_existing_keys() -> anyhow::Result<()> {
 }
 
 #[async_std::test]
-async fn deletes_keys() -> anyhow::Result<()> {
+async fn deletes_key() -> anyhow::Result<()> {
     let service = Service::default();
 
     service.set("key", r#""value""#).await?;
@@ -48,7 +48,7 @@ async fn deletes_keys() -> anyhow::Result<()> {
 }
 
 #[async_std::test]
-async fn fails_to_delete_non_existing_keys() -> anyhow::Result<()> {
+async fn fails_to_delete_non_existing_key() -> anyhow::Result<()> {
     let service = Service::default();
 
     assert!(matches!(
