@@ -121,7 +121,7 @@
             };
 
             scripts = {
-              kv.exec = "cargo run -p kv";
+              kv.exec = ''cargo run -p kv -- "$@"'';
               clippy.exec = "cargo clippy -- -D warnings";
               clippy-all.exec = "cargo clippy --all-features -- -D warnings";
             };
