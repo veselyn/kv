@@ -96,7 +96,7 @@ impl Repository {
             1 => Some(()),
             0 => None,
             _ => panic!(
-                r#"{} rows were affected by delete when expected 1 or 0"#,
+                "{:?} rows were affected by delete when expected 1 or 0",
                 affected,
             ),
         })

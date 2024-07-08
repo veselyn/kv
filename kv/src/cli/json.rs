@@ -47,7 +47,7 @@ impl Execute for GetCommand {
             .map_err(|err| {
                 command::Error::default().message(match err {
                     GetError::KeyNotFound(key) => {
-                        format!(r#"key "{}" not found"#, key)
+                        format!("key {:?} not found", key)
                     }
                     GetError::Repository(_) => err.to_string(),
                 })
@@ -90,7 +90,7 @@ impl Execute for DelCommand {
             .map_err(|err| {
                 command::Error::default().message(match err {
                     DelError::KeyNotFound(key) => {
-                        format!(r#"key "{}" not found"#, key)
+                        format!("key {:?} not found", key)
                     }
                     DelError::Repository(_) => err.to_string(),
                 })
