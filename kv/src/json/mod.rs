@@ -15,7 +15,7 @@ impl Service {
         Self { repository }
     }
 
-    pub async fn get<K>(&self, key: K) -> Result<String, GetError>
+    pub async fn get<K>(&self, key: K, _paths: Option<&[&str]>) -> Result<String, GetError>
     where
         K: Into<String>,
     {
@@ -27,7 +27,7 @@ impl Service {
         Ok(value)
     }
 
-    pub async fn set<K, V>(&self, key: K, value: V) -> Result<(), SetError>
+    pub async fn set<K, V>(&self, key: K, value: V, _path: Option<&str>) -> Result<(), SetError>
     where
         K: Into<String>,
         V: Into<String>,
@@ -43,7 +43,7 @@ impl Service {
         Ok(())
     }
 
-    pub async fn del<K>(&self, key: K) -> Result<(), DelError>
+    pub async fn del<K>(&self, key: K, _path: Option<&str>) -> Result<(), DelError>
     where
         K: Into<String>,
     {
