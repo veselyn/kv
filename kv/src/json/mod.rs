@@ -67,11 +67,29 @@ impl Service {
         Ok(value)
     }
 
-    pub async fn set<K, V>(&self, key: K, value: V, _path: Option<&str>) -> Result<(), SetError>
+    pub async fn set<K, V>(&self, key: K, value: V, path: Option<&str>) -> Result<(), SetError>
     where
         K: Into<String>,
         V: Into<String>,
     {
+        let key = key.into();
+        let value = value.into();
+
+        if let Some(path) = path {
+            let result =
+                self.repository
+                    .set_path(&key, &value, path)
+                    .await
+                    .map_err(|err| match err {
+                        repository::SetError::MalformedJson(_) => SetError::InvalidJson(err),
+                        repository::SetError::Other(_) => SetError::from(err),
+                    })?;
+
+            result.ok_or_else(|| SetError::KeyNotFound(key.clone()))?;
+
+            return Ok(());
+        }
+
         self.repository
             .set(key, value)
             .await
