@@ -43,7 +43,10 @@ impl Execute for GetCommand {
             )
             .await
             .map(|value| -> command::Result {
-                let formatted = jq::format(value).map_err(|err| {
+                let formatted = jq::format(
+                    serde_json::to_string(&value).expect("serializing value"),
+                )
+                .map_err(|err| {
                     command::Error::default().message(format!("formatting value: {}", err))
                 })?;
 

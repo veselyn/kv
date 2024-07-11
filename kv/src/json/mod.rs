@@ -3,6 +3,7 @@ mod repository;
 
 pub use error::*;
 pub use repository::Repository;
+use std::str::FromStr;
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
@@ -15,14 +16,53 @@ impl Service {
         Self { repository }
     }
 
-    pub async fn get<K>(&self, key: K, _paths: Option<&[&str]>) -> Result<String, GetError>
+    pub async fn get<K>(
+        &self,
+        key: K,
+        paths: Option<&[&str]>,
+    ) -> Result<serde_json::Value, GetError>
     where
         K: Into<String>,
     {
         let key = key.into();
 
-        let result = self.repository.get(&key).await?;
-        let value = result.ok_or_else(|| GetError::KeyNotFound(key))?;
+        if let Some(paths) = paths {
+            let result = self
+                .repository
+                .get_paths(&key, paths)
+                .await?
+                .ok_or_else(|| GetError::KeyNotFound(key))?;
+
+            let paths_not_found: Vec<String> = paths
+                .iter()
+                .cloned()
+                .filter(|&path| !result.contains_key(path))
+                .map(ToOwned::to_owned)
+                .collect();
+
+            if !paths_not_found.is_empty() {
+                return Err(GetError::PathsNotFound(paths_not_found));
+            }
+
+            let map = serde_json::Map::from_iter(result.into_iter().map(|(path, value)| {
+                (
+                    path,
+                    serde_json::Value::from_str(&value).expect("deserializing value"),
+                )
+            }));
+
+            let value = serde_json::Value::Object(map);
+
+            return Ok(value);
+        }
+
+        let result = self
+            .repository
+            .get(&key)
+            .await?
+            .ok_or_else(|| GetError::KeyNotFound(key))?;
+
+        let value = serde_json::Value::from_str(&result).expect("deserializing value");
 
         Ok(value)
     }

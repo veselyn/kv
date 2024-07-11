@@ -1,5 +1,6 @@
 use super::*;
 use pretty_assertions::assert_eq;
+use serde_json::json;
 
 #[async_std::test]
 async fn sets_and_gets_key_without_path() -> anyhow::Result<()> {
@@ -7,7 +8,7 @@ async fn sets_and_gets_key_without_path() -> anyhow::Result<()> {
 
     service.set("key", r#""value""#, None).await?;
 
-    assert_eq!(r#""value""#, service.get("key", None).await?);
+    assert_eq!(json!("value"), service.get("key", None).await?);
 
     Ok(())
 }
@@ -18,7 +19,7 @@ async fn sets_and_gets_key_with_root_path() -> anyhow::Result<()> {
 
     service.set("key", r#""value""#, Some("$")).await?;
 
-    assert_eq!(r#""value""#, service.get("key", Some(&["$"])).await?);
+    assert_eq!(json!("value"), service.get("key", Some(&["$"])).await?);
 
     Ok(())
 }
@@ -30,8 +31,8 @@ async fn sets_and_gets_value_at_specific_path() -> anyhow::Result<()> {
     service.set("key", "{}", None).await?;
     service.set("key", r#""value""#, Some("$.key")).await?;
 
-    assert_eq!(r#"{"key":"value"}"#, service.get("key", None).await?);
-    assert_eq!(r#""value""#, service.get("key", Some(&["$.key"])).await?);
+    assert_eq!(json!({"key":"value"}), service.get("key", None).await?);
+    assert_eq!(json!("value"), service.get("key", Some(&["$.key"])).await?);
 
     Ok(())
 }
@@ -101,7 +102,7 @@ async fn gets_multiple_paths_of_key() -> anyhow::Result<()> {
     service.set("key", r#""value3""#, Some("$.key3")).await?;
 
     assert_eq!(
-        r#"{"$.key1":"value1","$.key2":"value2","$.key3":"value3"}"#,
+        json!({"$.key1":"value1","$.key2":"value2","$.key3":"value3"}),
         service
             .get("key", Some(&["$.key1", "$.key2", "$.key3"]))
             .await?
@@ -118,7 +119,7 @@ async fn gets_duplicate_path_of_key_once() -> anyhow::Result<()> {
     service.set("key", r#""value""#, Some("$.key")).await?;
 
     assert_eq!(
-        r#"{"$.key":"value"}"#,
+        json!({"$.key":"value"}),
         service
             .get("key", Some(&["$.key", "$.key", "$.key"]))
             .await?
@@ -135,7 +136,7 @@ async fn replaces_existing_key_without_path() -> anyhow::Result<()> {
     service.set("key", r#""value2""#, None).await?;
     service.set("key", r#""value3""#, None).await?;
 
-    assert_eq!(r#""value3""#, service.get("key", None).await?);
+    assert_eq!(json!("value3"), service.get("key", None).await?);
 
     Ok(())
 }
@@ -148,7 +149,7 @@ async fn replaces_existing_key_with_root_path() -> anyhow::Result<()> {
     service.set("key", r#""value2""#, Some("$")).await?;
     service.set("key", r#""value3""#, Some("$")).await?;
 
-    assert_eq!(r#""value3""#, service.get("key", None).await?);
+    assert_eq!(json!("value3"), service.get("key", None).await?);
 
     Ok(())
 }
@@ -162,7 +163,7 @@ async fn replaces_value_at_specific_path() -> anyhow::Result<()> {
     service.set("key", r#""value2""#, Some("$.key")).await?;
     service.set("key", r#""value3""#, Some("$.key")).await?;
 
-    assert_eq!(r#""value3""#, service.get("key", Some(&["$.key"])).await?);
+    assert_eq!(json!("value3"), service.get("key", Some(&["$.key"])).await?);
 
     Ok(())
 }
@@ -211,10 +212,7 @@ async fn deletes_value_at_specific_path() -> anyhow::Result<()> {
 
     service.del("key", Some("$.key")).await?;
 
-    assert!(matches!(
-        service.get("key", None).await,
-        Ok(value) if value == "{}",
-    ));
+    assert_eq!(json!({}), service.get("key", None).await?);
 
     Ok(())
 }
@@ -277,7 +275,7 @@ async fn minifies_json() -> anyhow::Result<()> {
         .set("key", r#" {  "key"   : "value"  }   "#, None)
         .await?;
 
-    assert_eq!(r#"{"key":"value"}"#, service.get("key", None).await?);
+    assert_eq!(json!({"key":"value"}), service.get("key", None).await?);
 
     Ok(())
 }

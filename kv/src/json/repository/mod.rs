@@ -42,18 +42,21 @@ impl Repository {
     where
         K: Into<String>,
         P: IntoIterator,
-        P::Item: Into<String>,
+        P::Item: AsRef<str>,
     {
-        let paths: Vec<String> = paths.into_iter().map(Into::into).collect();
+        let paths: Vec<String> = paths
+            .into_iter()
+            .map(|path| path.as_ref().to_owned())
+            .collect();
 
         let mut select_statement = Query::select();
 
-        for path in &paths {
+        paths.iter().for_each(|path| {
             select_statement.expr_as(
                 Expr::col(key::Column::Value).get_json_field(path),
-                path.as_str().into_identity(),
+                path.clone().into_identity(),
             );
-        }
+        });
 
         select_statement
             .from(key::Entity)
@@ -73,7 +76,7 @@ impl Repository {
             match result.try_get("", path).map_err(TryGetError::from) {
                 Ok(value) => {
                     if let Some(value) = acc.insert(path.to_owned(), value) {
-                        panic!("path {path:?} has present value {value:?}");
+                        panic!("path {:?} has present value {value:?}", path);
                     }
                     Ok(acc)
                 }
