@@ -3,8 +3,10 @@ mod error;
 use crate::database::Database;
 use entity::key;
 pub use error::*;
-use sea_orm::prelude::*;
+use extension::sqlite::SqliteExpr;
+use sea_orm::{prelude::*, IntoIdentity, TryGetError};
 use sea_query::*;
+use std::collections::HashMap;
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
@@ -21,26 +23,68 @@ impl Repository {
     where
         K: Into<String>,
     {
-        let select_statement = Query::select()
-            .expr_as(
-                Expr::cust_with_expr("JSON(?)", Expr::col(key::Column::Value)),
-                key::Column::Value,
-            )
+        let paths = self.get_paths(key, ["$"]).await?;
+
+        let Some(mut paths) = paths else {
+            return Ok(None);
+        };
+
+        let value = paths.remove("$").expect("paths does not contain root");
+
+        Ok(Some(value))
+    }
+
+    pub async fn get_paths<K, P>(
+        &self,
+        key: K,
+        paths: P,
+    ) -> Result<Option<HashMap<String, String>>, GetError>
+    where
+        K: Into<String>,
+        P: IntoIterator,
+        P::Item: Into<String>,
+    {
+        let paths: Vec<String> = paths.into_iter().map(Into::into).collect();
+
+        let mut select_statement = Query::select();
+
+        for path in &paths {
+            select_statement.expr_as(
+                Expr::col(key::Column::Value).get_json_field(path),
+                path.as_str().into_identity(),
+            );
+        }
+
+        select_statement
             .from(key::Entity)
             .and_where(key::Column::Type.eq("json"))
-            .and_where(key::Column::Id.eq(key.into()))
-            .to_owned();
+            .and_where(key::Column::Id.eq(key.into()));
 
         let result = self
             .db
             .query_one(self.db.get_database_backend().build(&select_statement))
             .await?;
 
-        let value = result
-            .map(|result| result.try_get("", "value"))
-            .transpose()?;
+        let Some(result) = result else {
+            return Ok(None);
+        };
 
-        Ok(value)
+        let paths = paths.iter().try_fold(HashMap::new(), |mut acc, path| {
+            match result.try_get("", path).map_err(TryGetError::from) {
+                Ok(value) => {
+                    if let Some(value) = acc.insert(path.to_owned(), value) {
+                        panic!("path {path:?} has present value {value:?}");
+                    }
+                    Ok(acc)
+                }
+                Err(err) => match err {
+                    TryGetError::Null(_) => Ok(acc),
+                    TryGetError::DbErr(err) => Err(err),
+                },
+            }
+        })?;
+
+        Ok(Some(paths))
     }
 
     pub async fn set<K, V>(&self, key: K, value: V) -> Result<(), SetError>
