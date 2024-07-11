@@ -101,14 +101,25 @@ impl Service {
         Ok(())
     }
 
-    pub async fn del<K>(&self, key: K, _path: Option<&str>) -> Result<(), DelError>
+    pub async fn del<K>(&self, key: K, path: Option<&str>) -> Result<(), DelError>
     where
         K: Into<String>,
     {
         let key = key.into();
 
-        let result = self.repository.del(&key).await?;
-        result.ok_or_else(|| DelError::KeyNotFound(key))?;
+        if let Some(path) = path {
+            self.repository
+                .del_path(&key, path)
+                .await?
+                .ok_or_else(|| DelError::PathNotFound(path.to_owned()))?;
+
+            return Ok(());
+        }
+
+        self.repository
+            .del(&key)
+            .await?
+            .ok_or_else(|| DelError::KeyNotFound(key))?;
 
         Ok(())
     }

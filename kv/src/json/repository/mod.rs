@@ -208,7 +208,7 @@ impl Repository {
         })
     }
 
-    pub async fn del_path<K, P>(&self, key: K, path: P) -> Result<Option<()>, DelPathError>
+    pub async fn del_path<K, P>(&self, key: K, path: P) -> Result<Option<()>, DelError>
     where
         K: Into<String>,
         P: Into<String>,
@@ -240,7 +240,7 @@ impl Repository {
             .expect("no result from key exists query");
 
         if !result.try_get("", "key_exists")? {
-            return Err(DelPathError::KeyNotFound(key));
+            return Err(DelError::KeyNotFound(key));
         }
 
         let select_path_exists_statement = Query::select()

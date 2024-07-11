@@ -16,8 +16,6 @@ pub enum GetError {
 pub enum SetError {
     #[error("key not found: {0}")]
     KeyNotFound(String),
-    #[error("path not found: {0:?}")]
-    PathNotFound(String),
     #[error("received invalid json")]
     InvalidJson(#[source] repository::SetError),
     #[error("setting key into repository: {0}")]
