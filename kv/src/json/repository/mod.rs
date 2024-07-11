@@ -4,7 +4,7 @@ use crate::database::Database;
 use entity::key;
 pub use error::*;
 use extension::sqlite::SqliteExpr;
-use sea_orm::{prelude::*, IntoIdentity, TryGetError};
+use sea_orm::{prelude::*, IntoIdentity, TransactionTrait, TryGetError};
 use sea_query::*;
 use std::collections::HashMap;
 
@@ -191,6 +191,109 @@ impl Repository {
         let result = self
             .db
             .execute(self.db.get_database_backend().build(&delete_statement))
+            .await?;
+
+        let affected = result.rows_affected();
+
+        Ok(match affected {
+            1 => Some(()),
+            0 => None,
+            _ => panic!(
+                "{:?} rows were affected by delete when expected 1 or 0",
+                affected,
+            ),
+        })
+    }
+
+    pub async fn del_path<K, P>(&self, key: K, path: P) -> Result<Option<()>, DelPathError>
+    where
+        K: Into<String>,
+        P: Into<String>,
+    {
+        let key = key.into();
+        let path = path.into();
+
+        let txn = self.db.begin().await?;
+
+        let select_key_exists_statement = Query::select()
+            .expr_as(
+                Expr::exists(
+                    Query::select()
+                        .from(key::Entity)
+                        .and_where(key::Column::Type.eq("json"))
+                        .and_where(key::Column::Id.eq(&key))
+                        .take(),
+                ),
+                "key_exists".into_identity(),
+            )
+            .to_owned();
+
+        let result = txn
+            .query_one(
+                txn.get_database_backend()
+                    .build(&select_key_exists_statement),
+            )
+            .await?
+            .expect("no result from key exists query");
+
+        if !result.try_get("", "key_exists")? {
+            return Err(DelPathError::KeyNotFound(key));
+        }
+
+        let select_path_exists_statement = Query::select()
+            .expr_as(
+                Expr::exists(
+                    Query::select()
+                        .from(key::Entity)
+                        .and_where(key::Column::Type.eq("json"))
+                        .and_where(key::Column::Id.eq(&key))
+                        .and_where(
+                            Expr::expr(Expr::cust_with_exprs(
+                                "JSON_TYPE(?, ?)",
+                                [
+                                    Expr::col(key::Column::Value).into(),
+                                    Expr::val(&path).into(),
+                                ],
+                            ))
+                            .is_not_null(),
+                        )
+                        .take(),
+                ),
+                "Path_exists".into_identity(),
+            )
+            .to_owned();
+
+        let result = txn
+            .query_one(
+                txn.get_database_backend()
+                    .build(&select_path_exists_statement),
+            )
+            .await?
+            .expect("no result from path exists query");
+
+        if !result.try_get("", "path_exists")? {
+            return Ok(None);
+        }
+
+        let update_statement = Query::update()
+            .table(key::Entity)
+            .value(
+                key::Column::Value,
+                Expr::cust_with_exprs(
+                    "JSON_REMOVE(?, ?)",
+                    [
+                        Expr::col(key::Column::Value).into(),
+                        Expr::val(&path).into(),
+                    ],
+                ),
+            )
+            .and_where(key::Column::Type.eq("json"))
+            .and_where(key::Column::Id.eq(&key))
+            .to_owned();
+
+        let result = self
+            .db
+            .execute(self.db.get_database_backend().build(&update_statement))
             .await?;
 
         let affected = result.rows_affected();
