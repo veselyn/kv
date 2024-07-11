@@ -99,11 +99,12 @@ impl Repository {
             .values_panic([
                 key.into().into(),
                 "json".into(),
-                Expr::cust_with_expr("JSON(?)", value.into()),
+                Expr::cust_with_values("JSON(?)", [value.into()]),
             ])
             .to_owned();
 
-        self.db
+        let result = self
+            .db
             .execute(self.db.get_database_backend().build(&insert_statement))
             .await
             .map_err(|db_err| match db_err {
@@ -116,7 +117,65 @@ impl Repository {
                 err => SetError::from(err),
             })?;
 
+        let affected = result.rows_affected();
+
+        if affected != 1 {
+            panic!(
+                "{:?} rows were affected by set when expected 1 or 0",
+                affected,
+            )
+        }
+
         Ok(())
+    }
+
+    pub async fn set_path<K, V, P>(&self, key: K, value: V, path: P) -> Result<Option<()>, SetError>
+    where
+        K: Into<String>,
+        V: Into<String>,
+        P: Into<String>,
+    {
+        let update_statement = Query::update()
+            .table(key::Entity)
+            .value(
+                key::Column::Value,
+                Expr::cust_with_exprs(
+                    "JSON_SET(?, ?, JSON(?))",
+                    [
+                        Expr::col(key::Column::Value).into(),
+                        Expr::val(path.into()).into(),
+                        Expr::val(value.into()).into(),
+                    ],
+                ),
+            )
+            .and_where(key::Column::Type.eq("json"))
+            .and_where(key::Column::Id.eq(key.into()))
+            .to_owned();
+
+        let result = self
+            .db
+            .execute(self.db.get_database_backend().build(&update_statement))
+            .await
+            .map_err(|db_err| match db_err {
+                DbErr::Exec(RuntimeErr::SqlxError(SqlxError::Database(ref err))) => {
+                    match (err.code().as_deref(), err.message()) {
+                        (Some("1"), "malformed JSON") => SetError::MalformedJson(db_err),
+                        _ => SetError::from(db_err),
+                    }
+                }
+                err => SetError::from(err),
+            })?;
+
+        let affected = result.rows_affected();
+
+        Ok(match affected {
+            1 => Some(()),
+            0 => None,
+            _ => panic!(
+                "{:?} rows were affected by set when expected 1 or 0",
+                affected,
+            ),
+        })
     }
 
     pub async fn del<K>(&self, key: K) -> Result<Option<()>, DelError>
