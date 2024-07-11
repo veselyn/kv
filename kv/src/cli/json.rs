@@ -67,6 +67,7 @@ impl Execute for GetCommand {
 }
 
 #[derive(Args, Debug, Clone)]
+#[command(allow_missing_positional = true)]
 pub struct SetCommand {
     pub key: String,
     pub path: Option<String>,
@@ -82,7 +83,6 @@ impl Execute for SetCommand {
             .map_err(|err| {
                 command::Error::default().message(match err {
                     SetError::KeyNotFound(key) => format!("key not found: {:?}", key),
-                    SetError::PathNotFound(path) => format!("path not found: {:?}", path),
                     SetError::InvalidJson(_) => "invalid JSON".to_owned(),
                     SetError::Repository(_) => err.to_string(),
                 })

@@ -4,9 +4,9 @@ use crate::database::Database;
 use entity::key;
 pub use error::*;
 use extension::sqlite::SqliteExpr;
-use sea_orm::{prelude::*, IntoIdentity, TransactionTrait, TryGetError};
+use sea_orm::{prelude::*, IntoIdentity, TransactionTrait};
 use sea_query::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[cfg_attr(test, derive(Default))]
 #[derive(Debug)]
@@ -44,7 +44,7 @@ impl Repository {
         P: IntoIterator,
         P::Item: AsRef<str>,
     {
-        let paths: Vec<String> = paths
+        let paths: HashSet<String> = paths
             .into_iter()
             .map(|path| path.as_ref().to_owned())
             .collect();
@@ -73,7 +73,7 @@ impl Repository {
         };
 
         let paths = paths.iter().try_fold(HashMap::new(), |mut acc, path| {
-            match result.try_get("", path).map_err(TryGetError::from) {
+            match result.try_get("", path) {
                 Ok(value) => {
                     if let Some(value) = acc.insert(path.to_owned(), value) {
                         panic!("path {:?} has present value {value:?}", path);
@@ -81,8 +81,13 @@ impl Repository {
                     Ok(acc)
                 }
                 Err(err) => match err {
-                    TryGetError::Null(_) => Ok(acc),
-                    TryGetError::DbErr(err) => Err(err),
+                    DbErr::Type(msg)
+                        if msg
+                            == format!("A null value was encountered while decoding {path:?}") =>
+                    {
+                        Ok(acc)
+                    }
+                    _ => Err(err),
                 },
             }
         })?;
@@ -138,6 +143,13 @@ impl Repository {
         V: Into<String>,
         P: Into<String>,
     {
+        let path = path.into();
+
+        if path == "$" {
+            self.set(key, value).await?;
+            return Ok(Some(()));
+        }
+
         let update_statement = Query::update()
             .table(key::Entity)
             .value(
@@ -146,7 +158,7 @@ impl Repository {
                     "JSON_SET(?, ?, JSON(?))",
                     [
                         Expr::col(key::Column::Value).into(),
-                        Expr::val(path.into()).into(),
+                        Expr::val(path).into(),
                         Expr::val(value.into()).into(),
                     ],
                 ),
@@ -181,14 +193,16 @@ impl Repository {
         })
     }
 
-    pub async fn del<K>(&self, key: K) -> Result<Option<()>, DelError>
+    pub async fn del<K>(&self, key: K) -> Result<(), DelError>
     where
         K: Into<String>,
     {
+        let key = key.into();
+
         let delete_statement = Query::delete()
             .from_table(key::Entity)
             .and_where(key::Column::Type.eq("json"))
-            .and_where(key::Column::Id.eq(key.into()))
+            .and_where(key::Column::Id.eq(&key))
             .to_owned();
 
         let result = self
@@ -198,14 +212,14 @@ impl Repository {
 
         let affected = result.rows_affected();
 
-        Ok(match affected {
-            1 => Some(()),
-            0 => None,
+        match affected {
+            1 => Ok(()),
+            0 => Err(DelError::KeyNotFound(key)),
             _ => panic!(
                 "{:?} rows were affected by delete when expected 1 or 0",
                 affected,
             ),
-        })
+        }
     }
 
     pub async fn del_path<K, P>(&self, key: K, path: P) -> Result<Option<()>, DelError>
@@ -216,12 +230,18 @@ impl Repository {
         let key = key.into();
         let path = path.into();
 
+        if path == "$" {
+            self.del(key).await?;
+            return Ok(Some(()));
+        }
+
         let txn = self.db.begin().await?;
 
         let select_key_exists_statement = Query::select()
             .expr_as(
                 Expr::exists(
                     Query::select()
+                        .column(key::Column::Id)
                         .from(key::Entity)
                         .and_where(key::Column::Type.eq("json"))
                         .and_where(key::Column::Id.eq(&key))
@@ -247,6 +267,7 @@ impl Repository {
             .expr_as(
                 Expr::exists(
                     Query::select()
+                        .column(key::Column::Id)
                         .from(key::Entity)
                         .and_where(key::Column::Type.eq("json"))
                         .and_where(key::Column::Id.eq(&key))
@@ -262,7 +283,7 @@ impl Repository {
                         )
                         .take(),
                 ),
-                "Path_exists".into_identity(),
+                "path_exists".into_identity(),
             )
             .to_owned();
 
@@ -294,20 +315,23 @@ impl Repository {
             .and_where(key::Column::Id.eq(&key))
             .to_owned();
 
-        let result = self
-            .db
-            .execute(self.db.get_database_backend().build(&update_statement))
+        let result = txn
+            .execute(txn.get_database_backend().build(&update_statement))
             .await?;
 
         let affected = result.rows_affected();
 
-        Ok(match affected {
+        let result = match affected {
             1 => Some(()),
             0 => None,
             _ => panic!(
                 "{:?} rows were affected by delete when expected 1 or 0",
                 affected,
             ),
-        })
+        };
+
+        txn.commit().await?;
+
+        Ok(result)
     }
 }

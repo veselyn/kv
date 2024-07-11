@@ -50,15 +50,18 @@ async fn fails_to_set_specific_path_of_non_existing_key() -> anyhow::Result<()> 
 }
 
 #[async_std::test]
-async fn fails_to_set_non_existing_path_of_key() -> anyhow::Result<()> {
+async fn sets_specific_nested_path_of_key() -> anyhow::Result<()> {
     let service = Service::default();
 
     service.set("key", "{}", None).await?;
+    service
+        .set("key", r#""value""#, Some("$.nested.key"))
+        .await?;
 
-    assert!(matches!(
-        service.set("key", r#""value""#, Some("$.nested.key")).await,
-        Err(SetError::PathNotFound(path)) if path == "$.nested.key",
-    ));
+    assert_eq!(
+        json!({"nested":{"key":"value"}}),
+        service.get("key", Some(&["$"])).await?
+    );
 
     Ok(())
 }
@@ -71,8 +74,8 @@ async fn fails_to_get_non_existing_path_of_key() -> anyhow::Result<()> {
     service.set("key", r#""value1""#, Some("$.key1")).await?;
 
     assert!(matches!(
-        service.get("key", Some(&["$.key2", "$.key2"])).await,
-        Err(GetError::PathsNotFound(paths)) if paths == ["$.key2", "$.key2"],
+        service.get("key", Some(&["$.key2"])).await,
+        Err(GetError::PathsNotFound(paths)) if paths == ["$.key2"],
     ));
 
     Ok(())
@@ -83,10 +86,11 @@ async fn fails_to_get_non_existing_paths_of_key() -> anyhow::Result<()> {
     let service = Service::default();
 
     service.set("key", "{}", None).await?;
+    service.set("key", r#""value1""#, Some("$.key1")).await?;
 
     assert!(matches!(
         service.get("key", Some(&["$.key1", "$.key2", "$.key3"])).await,
-        Err(GetError::PathsNotFound(paths)) if paths == ["$.key"],
+        Err(GetError::PathsNotFound(paths)) if paths == ["$.key2", "$.key3"],
     ));
 
     Ok(())
@@ -187,6 +191,8 @@ async fn deletes_key_without_path() -> anyhow::Result<()> {
 
 #[async_std::test]
 async fn deletes_key_with_root_path() -> anyhow::Result<()> {
+    env_logger::init();
+
     let service = Service::default();
 
     service.set("key", r#""value""#, None).await?;

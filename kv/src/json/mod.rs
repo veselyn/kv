@@ -31,7 +31,7 @@ impl Service {
                 .repository
                 .get_paths(&key, paths)
                 .await?
-                .ok_or_else(|| GetError::KeyNotFound(key))?;
+                .ok_or_else(|| GetError::KeyNotFound(key.clone()))?;
 
             let paths_not_found: Vec<String> = paths
                 .iter()
@@ -44,10 +44,18 @@ impl Service {
                 return Err(GetError::PathsNotFound(paths_not_found));
             }
 
-            let map = serde_json::Map::from_iter(result.into_iter().map(|(path, value)| {
+            if paths.len() == 1 {
+                return Ok(serde_json::Value::from_str(
+                    result.get(paths[0]).expect("path not found"),
+                )
+                .expect("serializing value"));
+            }
+
+            let map = serde_json::Map::from_iter(paths.iter().map(|&path| {
                 (
-                    path,
-                    serde_json::Value::from_str(&value).expect("deserializing value"),
+                    path.to_owned(),
+                    serde_json::Value::from_str(result.get(path).expect("path not found"))
+                        .expect("deserializing value"),
                 )
             }));
 
@@ -82,7 +90,7 @@ impl Service {
                     .await
                     .map_err(|err| match err {
                         repository::SetError::MalformedJson(_) => SetError::InvalidJson(err),
-                        repository::SetError::Other(_) => SetError::from(err),
+                        _ => SetError::from(err),
                     })?;
 
             result.ok_or_else(|| SetError::KeyNotFound(key.clone()))?;
@@ -95,7 +103,7 @@ impl Service {
             .await
             .map_err(|err| match err {
                 repository::SetError::MalformedJson(_) => SetError::InvalidJson(err),
-                repository::SetError::Other(_) => SetError::from(err),
+                _ => SetError::from(err),
             })?;
 
         Ok(())
@@ -110,16 +118,20 @@ impl Service {
         if let Some(path) = path {
             self.repository
                 .del_path(&key, path)
-                .await?
+                .await
+                .map_err(|err| match err {
+                    repository::DelError::KeyNotFound(key) => DelError::KeyNotFound(key),
+                    _ => DelError::from(err),
+                })?
                 .ok_or_else(|| DelError::PathNotFound(path.to_owned()))?;
 
             return Ok(());
         }
 
-        self.repository
-            .del(&key)
-            .await?
-            .ok_or_else(|| DelError::KeyNotFound(key))?;
+        self.repository.del(&key).await.map_err(|err| match err {
+            repository::DelError::KeyNotFound(key) => DelError::KeyNotFound(key),
+            _ => DelError::from(err),
+        })?;
 
         Ok(())
     }
