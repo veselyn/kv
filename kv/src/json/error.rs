@@ -4,7 +4,7 @@ use super::repository;
 
 #[derive(Debug, Error)]
 pub enum GetError {
-    #[error("key not found: {0}")]
+    #[error("key not found: {0:?}")]
     KeyNotFound(String),
     #[error("paths not found: {0:?}")]
     PathsNotFound(Vec<String>),
@@ -14,7 +14,7 @@ pub enum GetError {
 
 #[derive(Debug, Error)]
 pub enum SetError {
-    #[error("key not found: {0}")]
+    #[error("key not found: {0:?}")]
     KeyNotFound(String),
     #[error("received invalid json")]
     InvalidJson(#[source] repository::SetError),
@@ -24,9 +24,9 @@ pub enum SetError {
 
 #[derive(Debug, Error)]
 pub enum DelError {
-    #[error("key not found: {0}")]
+    #[error("key not found: {0:?}")]
     KeyNotFound(String),
-    #[error("path not found: {0}")]
+    #[error("path not found: {0:?}")]
     PathNotFound(String),
     #[error("deleting key from repository: {0}")]
     Repository(#[from] repository::DelError),

@@ -17,7 +17,7 @@ pub enum SetError {
 
 #[derive(Debug, Error)]
 pub enum DelError {
-    #[error("key not found: {0}")]
+    #[error("key not found: {0:?}")]
     KeyNotFound(String),
     #[error(transparent)]
     Other(#[from] DbErr),
