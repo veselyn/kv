@@ -59,7 +59,7 @@ impl Execute for GetCommand {
                     GetError::KeyNotFound(key) => {
                         format!("key {:?} not found", key)
                     }
-                    GetError::PathsNotFound(paths) => format!(r#"paths {:?} not found"#, paths),
+                    GetError::PathsNotFound(paths) => format!("paths {:?} not found", paths),
                     GetError::Repository(_) => err.to_string(),
                 })
             })?
