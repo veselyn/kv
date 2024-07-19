@@ -60,7 +60,7 @@
               mkdir completion
 
               for shell in bash fish zsh; do
-                $out/bin/kv completion $shell > completion/$shell
+                KV_DATABASE=:memory: $out/bin/kv completion $shell > completion/kv.$shell
               done
 
               installShellCompletion completion/*
