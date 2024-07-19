@@ -42,7 +42,7 @@ async fn fails_to_set_specific_path_of_non_existing_key() -> anyhow::Result<()> 
     let service = Service::default();
 
     assert!(matches!(
-        service.set("key", r#""value""#, Some("$.nested.key")).await,
+        service.set("key", r#""value""#, Some("$.key")).await,
         Err(SetError::KeyNotFound(key)) if key == "key",
     ));
 
@@ -71,11 +71,10 @@ async fn fails_to_get_non_existing_path_of_key() -> anyhow::Result<()> {
     let service = Service::default();
 
     service.set("key", "{}", None).await?;
-    service.set("key", r#""value1""#, Some("$.key1")).await?;
 
     assert!(matches!(
-        service.get("key", Some(&["$.key2"])).await,
-        Err(GetError::PathsNotFound(paths)) if paths == ["$.key2"],
+        service.get("key", Some(&["$.key1"])).await,
+        Err(GetError::PathsNotFound(paths)) if paths == ["$.key1"],
     ));
 
     Ok(())
