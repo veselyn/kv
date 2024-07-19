@@ -8,6 +8,6 @@ pub enum Error {
     InvalidOutput(#[from] std::str::Utf8Error),
     #[error("opening memstream file")]
     OpenMemstreamFile,
-    #[error("closing memstream file: {0}")]
+    #[error("closing memstream file: {0:?}")]
     CloseMemstreamFile(libc::c_int),
 }

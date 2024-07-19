@@ -28,15 +28,25 @@ impl Execute for Command {
 #[derive(Args, Debug, Clone)]
 pub struct GetCommand {
     pub key: String,
+    pub paths: Option<Vec<String>>,
 }
 
 impl Execute for GetCommand {
     async fn execute(self, app: &App) -> command::Result {
         app.json
-            .get(self.key)
+            .get(
+                self.key,
+                self.paths
+                    .as_ref()
+                    .map(|paths| paths.iter().map(String::as_str).collect::<Vec<_>>())
+                    .as_deref(),
+            )
             .await
             .map(|value| -> command::Result {
-                let formatted = jq::format(value).map_err(|err| {
+                let formatted = jq::format(
+                    serde_json::to_string(&value).expect("serializing value"),
+                )
+                .map_err(|err| {
                     command::Error::default().message(format!("formatting value: {}", err))
                 })?;
 
@@ -47,8 +57,9 @@ impl Execute for GetCommand {
             .map_err(|err| {
                 command::Error::default().message(match err {
                     GetError::KeyNotFound(key) => {
-                        format!(r#"key "{}" not found"#, key)
+                        format!("key {:?} not found", key)
                     }
+                    GetError::PathsNotFound(paths) => format!("paths {:?} not found", paths),
                     GetError::Repository(_) => err.to_string(),
                 })
             })?
@@ -56,19 +67,22 @@ impl Execute for GetCommand {
 }
 
 #[derive(Args, Debug, Clone)]
+#[command(allow_missing_positional = true)]
 pub struct SetCommand {
     pub key: String,
+    pub path: Option<String>,
     pub value: String,
 }
 
 impl Execute for SetCommand {
     async fn execute(self, app: &App) -> command::Result {
         app.json
-            .set(self.key, self.value)
+            .set(self.key, self.value, self.path.as_deref())
             .await
             .map(|_| command::Output::default())
             .map_err(|err| {
                 command::Error::default().message(match err {
+                    SetError::KeyNotFound(key) => format!("key not found: {:?}", key),
                     SetError::InvalidJson(_) => "invalid JSON".to_owned(),
                     SetError::Repository(_) => err.to_string(),
                 })
@@ -79,19 +93,21 @@ impl Execute for SetCommand {
 #[derive(Args, Debug, Clone)]
 pub struct DelCommand {
     pub key: String,
+    pub path: Option<String>,
 }
 
 impl Execute for DelCommand {
     async fn execute(self, app: &App) -> command::Result {
         app.json
-            .del(self.key)
+            .del(self.key, self.path.as_deref())
             .await
             .map(|_| command::Output::default())
             .map_err(|err| {
                 command::Error::default().message(match err {
                     DelError::KeyNotFound(key) => {
-                        format!(r#"key "{}" not found"#, key)
+                        format!("key {:?} not found", key)
                     }
+                    DelError::PathNotFound(path) => format!("path {:?} not found", path),
                     DelError::Repository(_) => err.to_string(),
                 })
             })
