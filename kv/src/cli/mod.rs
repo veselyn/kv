@@ -9,8 +9,8 @@ pub use command::Result;
 
 #[derive(Parser, Debug, Clone)]
 pub struct Cli {
-    #[arg(short, long, help = "Specify config file")]
-    pub config: Option<String>,
+    #[arg(short, long, help = "Specify database to use")]
+    pub database: Option<String>,
     #[command(subcommand)]
     pub command: Command,
 }
