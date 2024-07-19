@@ -1,5 +1,6 @@
 mod common;
 
+use assert_cmd::crate_name;
 use common::*;
 use predicates::prelude::*;
 
@@ -11,7 +12,9 @@ fn generates_bash_completion() {
         .args(["completion", "bash"])
         .assert()
         .success()
-        .stdout(predicate::str::starts_with("_kv() {".nl()));
+        .stdout(predicate::str::starts_with(
+            format!("_{}() {{", crate_name!()).nl(),
+        ));
 }
 
 #[test]
@@ -33,5 +36,7 @@ fn generates_zsh_completion() {
         .args(["completion", "zsh"])
         .assert()
         .success()
-        .stdout(predicate::str::starts_with("#compdef kv".nl()));
+        .stdout(predicate::str::starts_with(
+            format!("#compdef {}", crate_name!()).nl(),
+        ));
 }
