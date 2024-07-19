@@ -75,7 +75,7 @@ impl config::Source for Cli {
     fn collect(&self) -> Result<config::Map<String, config::Value>, config::ConfigError> {
         let mut map = config::Map::new();
 
-        if let Some(database) = &self.database {
+        if let Some(database) = &self.config.database {
             map.insert(
                 "database".to_owned(),
                 config::Value::new(

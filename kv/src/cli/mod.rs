@@ -2,17 +2,24 @@ mod command;
 mod completion;
 mod json;
 
-use crate::{app::App, config::Config};
+use crate::{app::App, config::Config as AppConfig};
+use clap::Args;
 use clap::{Parser, Subcommand};
 use command::Execute;
 pub use command::Result;
 
 #[derive(Parser, Debug, Clone)]
 pub struct Cli {
-    #[arg(short, long, help = "Specify database to use")]
-    pub database: Option<String>,
+    #[command(flatten)]
+    pub config: Config,
     #[command(subcommand)]
     pub command: Command,
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct Config {
+    #[arg(short, long, help = "Specify database to use")]
+    pub database: Option<String>,
 }
 
 #[derive(Subcommand, Debug, Clone)]
@@ -26,7 +33,7 @@ pub enum Command {
 impl Cli {
     pub async fn run(self) -> command::Result {
         let app = App::new(
-            Config::try_from(self.clone())
+            AppConfig::try_from(self.clone())
                 .map_err(|err| command::Error::default().message(err.to_string()))?,
         )
         .await
