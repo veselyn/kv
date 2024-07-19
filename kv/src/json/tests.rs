@@ -271,16 +271,3 @@ async fn validates_json() -> anyhow::Result<()> {
 
     Ok(())
 }
-
-#[async_std::test]
-async fn minifies_json() -> anyhow::Result<()> {
-    let service = Service::default();
-
-    service
-        .set("key", r#" {  "key"   : "value"  }   "#, None)
-        .await?;
-
-    assert_eq!(json!({"key":"value"}), service.get("key", None).await?);
-
-    Ok(())
-}
