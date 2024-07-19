@@ -1,4 +1,5 @@
 mod command;
+mod completion;
 mod json;
 
 use crate::{app::App, config::Config};
@@ -18,6 +19,8 @@ pub struct Cli {
 pub enum Command {
     #[command(subcommand, about = "Interact with JSON keys")]
     Json(json::Command),
+    #[command(subcommand, about = "Generate completion script")]
+    Completion(completion::Command),
 }
 
 impl Cli {
@@ -31,6 +34,7 @@ impl Cli {
 
         match self.command {
             Command::Json(command) => command.execute(&app).await,
+            Command::Completion(command) => command.execute(&app).await,
         }
     }
 }

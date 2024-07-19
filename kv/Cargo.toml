@@ -23,6 +23,7 @@ config = "0.14.0"
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = { version = "1.0.120", features = ["preserve_order"] }
 assert_cmd = { version = "2.0.14", features = ["color"] }
+clap_complete = "4.5.8"
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
