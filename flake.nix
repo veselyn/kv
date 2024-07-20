@@ -33,7 +33,7 @@
       entityDeps = with pkgs; lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.SystemConfiguration;
       testDeps = with pkgs; [jq];
 
-      buildDeps = with pkgs; [pkg-config] ++ testDeps ++ jqSysDeps;
+      buildDeps = with pkgs; [pkg-config installShellFiles] ++ testDeps ++ jqSysDeps;
       runtimeDeps = tlsDeps ++ entityDeps;
     in {
       formatter = treefmtModule.config.build.wrapper;
@@ -55,6 +55,16 @@
 
             nativeBuildInputs = buildDeps;
             buildInputs = runtimeDeps;
+
+            postInstall = ''
+              mkdir completion
+
+              for shell in bash fish zsh; do
+                KV_DATABASE=:memory: $out/bin/kv completion $shell > completion/kv.$shell
+              done
+
+              installShellCompletion completion/*
+            '';
           })
           .overrideAttrs
           jqSysEnv;
@@ -123,7 +133,7 @@
             scripts = {
               kv.exec = ''cargo run -p kv -- "$@"'';
               clippy.exec = "cargo clippy -- -D warnings";
-              clippy-all.exec = "cargo clippy --all-features -- -D warnings";
+              clippy-all.exec = "cargo clippy --all-targets --all-features -- -D warnings";
             };
           }
         ];

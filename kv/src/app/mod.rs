@@ -12,9 +12,9 @@ pub struct App {
 impl App {
     pub async fn new(config: Config) -> Result<Self, Error> {
         std::fs::create_dir_all(
-            PathBuf::from(&config.database_path)
+            PathBuf::from(&config.database)
                 .parent()
-                .expect("invalid database_path"),
+                .expect("invalid database"),
         )
         .map_err(Error::CreateKvDir)?;
 
@@ -22,10 +22,10 @@ impl App {
             .create(true)
             .truncate(false)
             .append(true)
-            .open(&config.database_path)
+            .open(&config.database)
             .map_err(Error::CreateDbFile)?;
 
-        let db = Database::new(&config.database_path).await?;
+        let db = Database::new(&config.database).await?;
 
         Ok(Self {
             json: json::Service::new(json::Repository::new(db)),

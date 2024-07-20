@@ -1,37 +1,38 @@
 pub use assert_cmd::prelude::*;
 use assert_cmd::{crate_name, Command};
-pub use kv::Config;
-use std::fmt::Display;
-use std::fs::File;
-use std::path::PathBuf;
+pub use kv::{Config, ConfigBuilder};
+use std::{collections::HashMap, fmt::Display};
 use tempfile::tempdir;
 
 #[derive(Debug, Clone)]
 pub struct Cli {
-    tmp_dir: PathBuf,
-    config: Config,
+    config: ConfigBuilder,
 }
 
 impl Cli {
     pub fn new() -> Self {
-        let tmp_dir = tempdir().expect("creating temp dir").into_path();
+        let config_builder = Config::builder()
+            .database(
+                tempdir()
+                    .expect("creating temp dir")
+                    .into_path()
+                    .join("db")
+                    .to_str()
+                    .expect("creating database path")
+                    .to_owned(),
+            )
+            .to_owned();
 
-        let config = Config {
-            database_path: tmp_dir
-                .join("db")
-                .to_str()
-                .expect("creating database path")
-                .to_owned(),
-        };
-
-        Self { tmp_dir, config }
+        Self {
+            config: config_builder,
+        }
     }
 
-    pub fn config<F>(&mut self, config: F) -> &Self
+    pub fn config<F>(&mut self, mut apply: F) -> &Self
     where
-        F: Fn(&Config) -> Config,
+        F: FnMut(&mut ConfigBuilder),
     {
-        self.config = config(&self.config);
+        apply(&mut self.config);
         self
     }
 
@@ -50,19 +51,22 @@ pub type Cmd = Box<dyn Fn() -> Command>;
 
 impl From<&Cli> for Cmd {
     fn from(cli: &Cli) -> Self {
-        let config_file_path = cli.tmp_dir.join("config.json");
-        let config_file = File::create(&config_file_path).expect("creating config file");
+        let config = &cli.config;
 
-        serde_json::to_writer(config_file, &cli.config).expect("serializing config to file");
+        let mut envs = HashMap::new();
 
-        let config = config_file_path
-            .to_str()
-            .expect("config file path is not utf8")
-            .to_owned();
+        envs.insert(
+            "KV_DATABASE".to_owned(),
+            config
+                .database
+                .as_ref()
+                .expect("database should be changed in tests")
+                .to_owned(),
+        );
 
         Box::new(move || {
             let mut cmd = Command::cargo_bin(crate_name!()).expect("creating command");
-            cmd.args(["--config", &config]);
+            cmd.envs(&envs);
             cmd
         })
     }
