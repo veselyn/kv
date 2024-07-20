@@ -49,7 +49,7 @@ impl TryFrom<Cli> for Config {
 
 impl config::Source for Config {
     fn clone_into_box(&self) -> Box<dyn config::Source + Send + Sync> {
-        todo!()
+        Box::new(self.clone())
     }
 
     fn collect(&self) -> Result<config::Map<String, config::Value>, config::ConfigError> {
