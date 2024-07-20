@@ -24,26 +24,6 @@ impl Default for Config {
     }
 }
 
-impl config::Source for Config {
-    fn clone_into_box(&self) -> Box<dyn config::Source + Send + Sync> {
-        todo!()
-    }
-
-    fn collect(&self) -> Result<config::Map<String, config::Value>, config::ConfigError> {
-        let mut map = config::Map::new();
-
-        map.insert(
-            "database".to_owned(),
-            config::Value::new(
-                Some(&"default".to_owned()),
-                config::ValueKind::String(self.database.to_owned()),
-            ),
-        );
-
-        Ok(map)
-    }
-}
-
 impl TryFrom<Cli> for Config {
     type Error = Error;
 
@@ -64,6 +44,26 @@ impl TryFrom<Cli> for Config {
             .build()?;
 
         Ok(config.try_deserialize()?)
+    }
+}
+
+impl config::Source for Config {
+    fn clone_into_box(&self) -> Box<dyn config::Source + Send + Sync> {
+        todo!()
+    }
+
+    fn collect(&self) -> Result<config::Map<String, config::Value>, config::ConfigError> {
+        let mut map = config::Map::new();
+
+        map.insert(
+            "database".to_owned(),
+            config::Value::new(
+                Some(&"default".to_owned()),
+                config::ValueKind::String(self.database.to_owned()),
+            ),
+        );
+
+        Ok(map)
     }
 }
 
