@@ -8,4 +8,3 @@ mod json;
 pub use cli::{Cli, Result};
 pub use config::Builder as ConfigBuilder;
 pub use config::Config;
-

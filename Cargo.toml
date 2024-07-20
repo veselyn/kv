@@ -3,5 +3,6 @@ members = [
 	"entity",
 	"kv",
 	"migration",
+	"xtask",
 ]
 resolver = "2"
