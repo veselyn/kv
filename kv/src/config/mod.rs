@@ -24,6 +24,35 @@ impl Default for Config {
     }
 }
 
+impl Config {
+    pub fn builder() -> Builder {
+        Builder::default()
+    }
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct Builder {
+    pub database: Option<String>,
+}
+
+impl Builder {
+    pub fn build(&self) -> Config {
+        let default = Config::default();
+
+        Config {
+            database: self
+                .database
+                .clone()
+                .unwrap_or_else(|| default.database.clone()),
+        }
+    }
+
+    pub fn database(&mut self, database: String) -> &Self {
+        self.database = Some(database);
+        self
+    }
+}
+
 impl TryFrom<Cli> for Config {
     type Error = Error;
 

@@ -1,34 +1,38 @@
 pub use assert_cmd::prelude::*;
 use assert_cmd::{crate_name, Command};
-pub use kv::Config;
-use std::fmt::Display;
+pub use kv::{Config, ConfigBuilder};
+use std::{collections::HashMap, fmt::Display};
 use tempfile::tempdir;
 
 #[derive(Debug, Clone)]
 pub struct Cli {
-    config: Config,
+    config: ConfigBuilder,
 }
 
 impl Cli {
     pub fn new() -> Self {
-        let config = Config {
-            database: tempdir()
-                .expect("creating temp dir")
-                .into_path()
-                .join("db")
-                .to_str()
-                .expect("creating database path")
-                .to_owned(),
-        };
+        let config_builder = Config::builder()
+            .database(
+                tempdir()
+                    .expect("creating temp dir")
+                    .into_path()
+                    .join("db")
+                    .to_str()
+                    .expect("creating database path")
+                    .to_owned(),
+            )
+            .to_owned();
 
-        Self { config }
+        Self {
+            config: config_builder,
+        }
     }
 
-    pub fn config<F>(&mut self, config: F) -> &Self
+    pub fn config<F>(&mut self, mut apply: F) -> &Self
     where
-        F: Fn(&Config) -> Config,
+        F: FnMut(&mut ConfigBuilder),
     {
-        self.config = config(&self.config);
+        apply(&mut self.config);
         self
     }
 
@@ -47,10 +51,17 @@ pub type Cmd = Box<dyn Fn() -> Command>;
 
 impl From<&Cli> for Cmd {
     fn from(cli: &Cli) -> Self {
-        let config = cli.config.clone();
+        let config = &cli.config;
+
+        let mut envs = HashMap::new();
+
+        if let Some(database) = &config.database {
+            envs.insert("KV_DATABASE".to_owned(), database.to_owned());
+        }
+
         Box::new(move || {
             let mut cmd = Command::cargo_bin(crate_name!()).expect("creating command");
-            cmd.env("KV_DATABASE", &config.database);
+            cmd.envs(&envs);
             cmd
         })
     }
