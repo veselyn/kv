@@ -55,9 +55,14 @@ impl From<&Cli> for Cmd {
 
         let mut envs = HashMap::new();
 
-        if let Some(database) = &config.database {
-            envs.insert("KV_DATABASE".to_owned(), database.to_owned());
-        }
+        envs.insert(
+            "KV_DATABASE".to_owned(),
+            config
+                .database
+                .as_ref()
+                .expect("database should be changed in tests")
+                .to_owned(),
+        );
 
         Box::new(move || {
             let mut cmd = Command::cargo_bin(crate_name!()).expect("creating command");
