@@ -57,13 +57,15 @@
             buildInputs = runtimeDeps;
 
             postInstall = ''
-              mkdir completion
+              mkdir -p share/doc
+              cargo xtask build-man-page --output share/doc
+              installManPage share/doc/*
 
+              mkdir -p share/completions
               for shell in bash fish zsh; do
-                KV_DATABASE=:memory: $out/bin/kv completion $shell > completion/kv.$shell
+                KV_DATABASE=:memory: $out/bin/kv completion $shell > share/completions/kv.$shell
               done
-
-              installShellCompletion completion/*
+              installShellCompletion share/completions/*
             '';
           })
           .overrideAttrs
