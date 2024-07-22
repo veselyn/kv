@@ -16,18 +16,14 @@ impl Service {
         Self { repository }
     }
 
-    pub async fn get<K>(
-        &self,
-        key: K,
-        paths: Option<&[&str]>,
-    ) -> Result<serde_json::Value, GetError>
+    pub async fn get<K>(&self, key: K, paths: Option<&[&str]>) -> Result<String, GetError>
     where
         K: Into<String>,
     {
         let key = key.into();
 
         if let Some(paths) = paths {
-            let result = self
+            let mut result = self
                 .repository
                 .get_paths(&key, paths)
                 .await?
@@ -45,10 +41,7 @@ impl Service {
             }
 
             if paths.len() == 1 {
-                return Ok(serde_json::Value::from_str(
-                    result.get(paths[0]).expect("path not found"),
-                )
-                .expect("serializing value"));
+                return Ok(result.remove(paths[0]).expect("path not found"));
             }
 
             let map = serde_json::Map::from_iter(paths.iter().map(|&path| {
@@ -61,7 +54,7 @@ impl Service {
 
             let value = serde_json::Value::Object(map);
 
-            return Ok(value);
+            return Ok(value.to_string());
         }
 
         let result = self
@@ -70,9 +63,7 @@ impl Service {
             .await?
             .ok_or_else(|| GetError::KeyNotFound(key))?;
 
-        let value = serde_json::Value::from_str(&result).expect("deserializing value");
-
-        Ok(value)
+        Ok(result)
     }
 
     pub async fn set<K, V>(&self, key: K, path: Option<&str>, value: V) -> Result<(), SetError>
