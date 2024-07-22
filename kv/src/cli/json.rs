@@ -77,7 +77,7 @@ pub struct SetCommand {
 impl Execute for SetCommand {
     async fn execute(self, app: &App) -> command::Result {
         app.json
-            .set(self.key, self.value, self.path.as_deref())
+            .set(self.key, self.path.as_deref(), self.value)
             .await
             .map(|_| command::Output::default())
             .map_err(|err| {
