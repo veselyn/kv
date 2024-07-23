@@ -50,3 +50,22 @@ mod sets_the_value {
     test!(object_one_key, "object_one_key", {"key":"value"});
     test!(object_multiple_keys, "object_multiple_keys", {"key1":"value1", "key2":"value2", "key3":"value3"});
 }
+
+#[async_std::test]
+async fn replaces_previous_value() -> Result<()> {
+    let service = Service::default();
+
+    service
+        .set("key", None, json!("value1").to_string())
+        .await?;
+    service
+        .set("key", None, json!("value2").to_string())
+        .await?;
+    service
+        .set("key", None, json!("value3").to_string())
+        .await?;
+
+    assert_eq!(json!("value3").to_string(), service.get("key", None).await?);
+
+    Ok(())
+}
