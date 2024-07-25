@@ -67,7 +67,7 @@ mod sets_the_value_at_path {
     use super::*;
 
     macro_rules! test {
-        ($name:ident, $($path:expr, $value:tt, $want:tt),*) => {
+        ($name:ident, $($path:expr, $value:tt, $want:tt),+) => {
             #[async_std::test]
             async fn $name() -> Result<()> {
                 let service = Service::default();
@@ -81,7 +81,7 @@ mod sets_the_value_at_path {
                     service.set(key, path, &value).await?;
 
                     self::assert_eq!(want, service.get(key, None).await?);
-                })*
+                })+
 
                 Ok(())
             }
