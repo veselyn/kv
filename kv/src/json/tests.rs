@@ -50,8 +50,8 @@ mod sets_the_value {
         ["value1", "value2", "value3"]
     );
     test!(object_empty, "object_empty", {});
-    test!(object_one_key, "object_one_key", {"key":"value"});
-    test!(object_multiple_keys, "object_multiple_keys", {"key1":"value1", "key2":"value2", "key3":"value3"});
+    test!(object_one_key, "object_one_key", { "key": "value" });
+    test!(object_multiple_keys, "object_multiple_keys", { "key1": "value1", "key2": "value2", "key3": "value3" });
     test!(
         replaces_value,
         "key",
@@ -117,8 +117,8 @@ mod sets_the_value_at_path {
         root_test!(array_one_element, ["value"]);
         root_test!(array_multiple_elements, ["value1", "value2", "value3"]);
         root_test!(object_empty, {});
-        root_test!(object_one_key, {"key":"value"});
-        root_test!(object_multiple_keys, {"key1":"value1", "key2":"value2", "key3":"value3"});
+        root_test!(object_one_key, { "key": "value" });
+        root_test!(object_multiple_keys, { "key1": "value1", "key2": "value2", "key3": "value3" });
     }
 
     mod specific {
@@ -138,9 +138,9 @@ mod sets_the_value_at_path {
             99,
             [1, [2, 3, 99], 4]
         );
-        specific_test!(replaces_value, {"a":2, "c":4}, "$.a", 99, {"a":99, "c":4});
-        specific_test!(inserts_value, {"a":2, "c":4}, "$.e", 99, {"a":2, "c":4, "e":99});
-        specific_test!(decodes_once, {"a":2, "c":4}, "$.c", [97, 96], {"a":2, "c":[97, 96]});
-        specific_test!(doesnt_decode_twice, {"a":2, "c":4}, "$.c", "[97, 96]", {"a":2, "c":"[97, 96]"});
+        specific_test!(replaces_value, { "a": 2, "c": 4 }, "$.a", 99, { "a": 99, "c": 4 });
+        specific_test!(inserts_value, { "a": 2, "c": 4 }, "$.e", 99, { "a": 2, "c": 4, "e": 99 });
+        specific_test!(decodes_once, { "a": 2, "c": 4 }, "$.c", [97, 96], { "a": 2, "c": [97, 96] });
+        specific_test!(doesnt_decode_twice, { "a": 2, "c": 4 }, "$.c", "[97, 96]", { "a": 2, "c": "[97, 96]" });
     }
 }
