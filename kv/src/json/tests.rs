@@ -144,3 +144,37 @@ mod sets_the_value_at_path {
         specific_test!(doesnt_decode_twice, { "a": 2, "c": 4 }, "$.c", "[97, 96]", { "a": 2, "c": "[97, 96]" });
     }
 }
+
+mod sets_the_value_fail {
+    use super::*;
+
+    macro_rules! test {
+        ($name:ident, $($key:expr, $path:expr, $value:expr, $want:pat $(if $guard:expr)?),+) => {
+            #[async_std::test]
+            async fn $name() -> Result<()> {
+                let service = Service::default();
+
+                $({
+                    let key = $key;
+                    let path = $path;
+                    let value = $value;
+
+                    let result = service.set(key, path, value).await;
+
+                    assert!(matches!(result, $want $(if $guard)?));
+                })+
+
+                Ok(())
+            }
+        };
+    }
+
+    test!(key_not_found, "key", Some("$.key"), json!("value").to_string(), Err(SetError::KeyNotFound(key)) if key == "key");
+    test!(
+        malformed_json,
+        "key",
+        None,
+        "invalid",
+        Err(SetError::InvalidJson(_))
+    );
+}
