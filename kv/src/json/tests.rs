@@ -69,3 +69,62 @@ async fn replaces_previous_value() -> Result<()> {
 
     Ok(())
 }
+
+mod sets_the_value_at_path {
+    use super::*;
+
+    macro_rules! test {
+        ($name:ident, $($path:expr, $value:tt, $want:tt),*) => {
+            #[async_std::test]
+            async fn $name() -> Result<()> {
+                let service = Service::default();
+
+                $({
+                    let key = "key";
+                    let path = Some($path);
+                    let value = json!($value).to_string();
+                    let want = json!($want).to_string();
+
+                    service.set(key, path, &value).await?;
+
+                    self::assert_eq!(want, service.get(key, None).await?);
+                })*
+
+                Ok(())
+            }
+        };
+    }
+
+    mod root {
+        use super::*;
+
+        macro_rules! root_test {
+            ($name:ident, $value:tt) => {
+                test!($name, "$", $value, $value);
+            };
+        }
+
+        root_test!(null, null);
+        root_test!(bool_false, false);
+        root_test!(bool_true, true);
+        root_test!(integer_negative, (-1));
+        root_test!(integer_negative_zero, (-0));
+        root_test!(integer_zero, 0);
+        root_test!(integer_positive, 1);
+        root_test!(float_negative, (-1.0));
+        root_test!(float_negative_zero, (-0.0));
+        root_test!(float_zero, 0.0);
+        root_test!(float_positive, 1.0);
+        root_test!(string_empty, "");
+        root_test!(string_normal, "value");
+        root_test!(string_space, "value space");
+        root_test!(string_tab, "value\ttab");
+        root_test!(string_newline, "value\nnewline");
+        root_test!(array_empty, []);
+        root_test!(array_one_element, ["value"]);
+        root_test!(array_multiple_elements, ["value1", "value2", "value3"]);
+        root_test!(object_empty, {});
+        root_test!(object_one_key, {"key":"value"});
+        root_test!(object_multiple_keys, {"key1":"value1", "key2":"value2", "key3":"value3"});
+    }
+}
