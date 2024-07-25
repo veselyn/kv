@@ -7,16 +7,19 @@ mod sets_the_value {
     use super::*;
 
     macro_rules! test {
-        ($name:ident, $key:expr, $value:tt) => {
+        ($name:ident, $($key:expr, $value:tt),+) => {
             #[async_std::test]
             async fn $name() -> Result<()> {
                 let service = Service::default();
-                let key = $key;
-                let value = json!($value).to_string();
 
-                service.set(key, None, &value).await?;
+                $({
+                    let key = $key;
+                    let value = json!($value).to_string();
 
-                self::assert_eq!(value, service.get(key, None).await?);
+                    service.set(key, None, &value).await?;
+
+                    self::assert_eq!(value, service.get(key, None).await?);
+                })+
 
                 Ok(())
             }
@@ -49,25 +52,15 @@ mod sets_the_value {
     test!(object_empty, "object_empty", {});
     test!(object_one_key, "object_one_key", {"key":"value"});
     test!(object_multiple_keys, "object_multiple_keys", {"key1":"value1", "key2":"value2", "key3":"value3"});
-}
-
-#[async_std::test]
-async fn replaces_previous_value() -> Result<()> {
-    let service = Service::default();
-
-    service
-        .set("key", None, json!("value1").to_string())
-        .await?;
-    service
-        .set("key", None, json!("value2").to_string())
-        .await?;
-    service
-        .set("key", None, json!("value3").to_string())
-        .await?;
-
-    assert_eq!(json!("value3").to_string(), service.get("key", None).await?);
-
-    Ok(())
+    test!(
+        replaces_value,
+        "key",
+        "value1",
+        "key",
+        "value2",
+        "key",
+        "value3"
+    );
 }
 
 mod sets_the_value_at_path {
