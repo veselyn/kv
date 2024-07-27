@@ -137,11 +137,11 @@ impl Repository {
         Ok(())
     }
 
-    pub async fn set_path<K, V, P>(&self, key: K, value: V, path: P) -> Result<Option<()>, SetError>
+    pub async fn set_path<K, V, P>(&self, key: K, path: P, value: V) -> Result<Option<()>, SetError>
     where
         K: Into<String>,
-        V: Into<String>,
         P: Into<String>,
+        V: Into<String>,
     {
         let path = path.into();
 

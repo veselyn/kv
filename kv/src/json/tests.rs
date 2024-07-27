@@ -6,7 +6,7 @@ use serde_json::json;
 async fn sets_and_gets_key_without_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", r#""value""#, None).await?;
+    service.set("key", None, r#""value""#).await?;
 
     assert_eq!(json!("value"), service.get("key", None).await?);
 
@@ -17,7 +17,7 @@ async fn sets_and_gets_key_without_path() -> anyhow::Result<()> {
 async fn sets_and_gets_key_with_root_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", r#""value""#, Some("$")).await?;
+    service.set("key", Some("$"), r#""value""#).await?;
 
     assert_eq!(json!("value"), service.get("key", Some(&["$"])).await?);
 
@@ -28,8 +28,8 @@ async fn sets_and_gets_key_with_root_path() -> anyhow::Result<()> {
 async fn sets_and_gets_value_at_specific_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
-    service.set("key", r#""value""#, Some("$.key")).await?;
+    service.set("key", None, "{}").await?;
+    service.set("key", Some("$.key"), r#""value""#).await?;
 
     assert_eq!(json!({"key":"value"}), service.get("key", None).await?);
     assert_eq!(json!("value"), service.get("key", Some(&["$.key"])).await?);
@@ -42,7 +42,7 @@ async fn fails_to_set_specific_path_of_non_existing_key() -> anyhow::Result<()> 
     let service = Service::default();
 
     assert!(matches!(
-        service.set("key", r#""value""#, Some("$.key")).await,
+        service.set("key", Some("$.key"),  r#""value""#).await,
         Err(SetError::KeyNotFound(key)) if key == "key",
     ));
 
@@ -53,9 +53,9 @@ async fn fails_to_set_specific_path_of_non_existing_key() -> anyhow::Result<()> 
 async fn sets_specific_nested_path_of_key() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
+    service.set("key", None, "{}").await?;
     service
-        .set("key", r#""value""#, Some("$.nested.key"))
+        .set("key", Some("$.nested.key"), r#""value""#)
         .await?;
 
     assert_eq!(
@@ -70,7 +70,7 @@ async fn sets_specific_nested_path_of_key() -> anyhow::Result<()> {
 async fn fails_to_get_non_existing_path_of_key() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
+    service.set("key", None, "{}").await?;
 
     assert!(matches!(
         service.get("key", Some(&["$.key1"])).await,
@@ -84,8 +84,8 @@ async fn fails_to_get_non_existing_path_of_key() -> anyhow::Result<()> {
 async fn fails_to_get_non_existing_paths_of_key() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
-    service.set("key", r#""value1""#, Some("$.key1")).await?;
+    service.set("key", None, "{}").await?;
+    service.set("key", Some("$.key1"), r#""value1""#).await?;
 
     assert!(matches!(
         service.get("key", Some(&["$.key1", "$.key2", "$.key3"])).await,
@@ -99,10 +99,10 @@ async fn fails_to_get_non_existing_paths_of_key() -> anyhow::Result<()> {
 async fn gets_multiple_paths_of_key() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
-    service.set("key", r#""value1""#, Some("$.key1")).await?;
-    service.set("key", r#""value2""#, Some("$.key2")).await?;
-    service.set("key", r#""value3""#, Some("$.key3")).await?;
+    service.set("key", None, "{}").await?;
+    service.set("key", Some("$.key1"), r#""value1""#).await?;
+    service.set("key", Some("$.key2"), r#""value2""#).await?;
+    service.set("key", Some("$.key3"), r#""value3""#).await?;
 
     assert_eq!(
         json!({"$.key1":"value1","$.key2":"value2","$.key3":"value3"}),
@@ -118,8 +118,8 @@ async fn gets_multiple_paths_of_key() -> anyhow::Result<()> {
 async fn gets_duplicate_path_of_key_once() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
-    service.set("key", r#""value""#, Some("$.key")).await?;
+    service.set("key", None, "{}").await?;
+    service.set("key", Some("$.key"), r#""value""#).await?;
 
     assert_eq!(
         json!({"$.key":"value"}),
@@ -135,9 +135,9 @@ async fn gets_duplicate_path_of_key_once() -> anyhow::Result<()> {
 async fn replaces_existing_key_without_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", r#""value1""#, None).await?;
-    service.set("key", r#""value2""#, None).await?;
-    service.set("key", r#""value3""#, None).await?;
+    service.set("key", None, r#""value1""#).await?;
+    service.set("key", None, r#""value2""#).await?;
+    service.set("key", None, r#""value3""#).await?;
 
     assert_eq!(json!("value3"), service.get("key", None).await?);
 
@@ -148,9 +148,9 @@ async fn replaces_existing_key_without_path() -> anyhow::Result<()> {
 async fn replaces_existing_key_with_root_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", r#""value1""#, Some("$")).await?;
-    service.set("key", r#""value2""#, Some("$")).await?;
-    service.set("key", r#""value3""#, Some("$")).await?;
+    service.set("key", Some("$"), r#""value1""#).await?;
+    service.set("key", Some("$"), r#""value2""#).await?;
+    service.set("key", Some("$"), r#""value3""#).await?;
 
     assert_eq!(json!("value3"), service.get("key", None).await?);
 
@@ -161,10 +161,10 @@ async fn replaces_existing_key_with_root_path() -> anyhow::Result<()> {
 async fn replaces_value_at_specific_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
-    service.set("key", r#""value1""#, Some("$.key")).await?;
-    service.set("key", r#""value2""#, Some("$.key")).await?;
-    service.set("key", r#""value3""#, Some("$.key")).await?;
+    service.set("key", None, "{}").await?;
+    service.set("key", Some("$.key"), r#""value1""#).await?;
+    service.set("key", Some("$.key"), r#""value2""#).await?;
+    service.set("key", Some("$.key"), r#""value3""#).await?;
 
     assert_eq!(json!("value3"), service.get("key", Some(&["$.key"])).await?);
 
@@ -175,7 +175,7 @@ async fn replaces_value_at_specific_path() -> anyhow::Result<()> {
 async fn deletes_key_without_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", r#""value""#, None).await?;
+    service.set("key", None, r#""value""#).await?;
     service.get("key", None).await?;
 
     service.del("key", None).await?;
@@ -194,7 +194,7 @@ async fn deletes_key_with_root_path() -> anyhow::Result<()> {
 
     let service = Service::default();
 
-    service.set("key", r#""value""#, None).await?;
+    service.set("key", None, r#""value""#).await?;
     service.get("key", None).await?;
 
     service.del("key", Some("$")).await?;
@@ -211,8 +211,8 @@ async fn deletes_key_with_root_path() -> anyhow::Result<()> {
 async fn deletes_value_at_specific_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
-    service.set("key", r#""value""#, Some("$.key")).await?;
+    service.set("key", None, "{}").await?;
+    service.set("key", Some("$.key"), r#""value""#).await?;
     service.get("key", None).await?;
 
     service.del("key", Some("$.key")).await?;
@@ -250,7 +250,7 @@ async fn fails_to_delete_non_existing_key_with_root_path() -> anyhow::Result<()>
 async fn fails_to_delete_non_existing_value_at_specific_path() -> anyhow::Result<()> {
     let service = Service::default();
 
-    service.set("key", "{}", None).await?;
+    service.set("key", None, "{}").await?;
 
     assert!(matches!(
         service.del("key", Some("$.key")).await,
@@ -265,7 +265,7 @@ async fn validates_json() -> anyhow::Result<()> {
     let service = Service::default();
 
     assert!(matches!(
-        service.set("key", "value", None).await,
+        service.set("key", None, "value").await,
         Err(SetError::InvalidJson(_)),
     ));
 

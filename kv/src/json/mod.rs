@@ -75,7 +75,7 @@ impl Service {
         Ok(value)
     }
 
-    pub async fn set<K, V>(&self, key: K, value: V, path: Option<&str>) -> Result<(), SetError>
+    pub async fn set<K, V>(&self, key: K, path: Option<&str>, value: V) -> Result<(), SetError>
     where
         K: Into<String>,
         V: Into<String>,
@@ -86,7 +86,7 @@ impl Service {
         if let Some(path) = path {
             let result =
                 self.repository
-                    .set_path(&key, &value, path)
+                    .set_path(&key, path, &value)
                     .await
                     .map_err(|err| match err {
                         repository::SetError::MalformedJson(_) => SetError::InvalidJson(err),
