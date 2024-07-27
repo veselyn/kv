@@ -26,7 +26,11 @@ mod gets_the_value {
         };
     }
 
-    test!(without_path, "key", { "a": 2, "c": [4, 5, { "f": 7 }] }, None, { "a": 2, "c": [4, 5, { "f": 7 }] });
+    mod without_path {
+        use super::*;
+
+        test!(without_path, "key", { "a": 2, "c": [4, 5, { "f": 7 }] }, None, { "a": 2, "c": [4, 5, { "f": 7 }] });
+    }
 
     mod single_path {
         use super::*;
