@@ -29,11 +29,15 @@ mod gets_the_value {
     mod without_path {
         use super::*;
 
-        test! {
+        macro_rules! without_path_test {
+            ($name:ident, $key:expr, $value:tt) => {
+                test!($name, $key, $value, None, $value);
+            };
+        }
+
+        without_path_test! {
             without_path,
-            "key",
-            { "a": 2, "c": [4, 5, { "f": 7 }] },
-            None,
+            "without_path",
             { "a": 2, "c": [4, 5, { "f": 7 }] }
         }
     }
@@ -41,74 +45,80 @@ mod gets_the_value {
     mod single_path {
         use super::*;
 
-        test! {
+        macro_rules! single_path_test {
+            ($name:ident, $key:expr, $initial:tt, $path:expr, $want:tt) => {
+                test!($name, $key, $initial, Some(&[$path]), $want);
+            };
+        }
+
+        single_path_test! {
             root_path,
             "root_path",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["$"]),
+            "$",
             { "a": 2, "c": [4, 5, { "f": 7 }] }
         }
-        test! {
+        single_path_test! {
             simple_key,
             "simple_key",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["$.c"]),
+            "$.c",
             [4, 5, { "f": 7 }]
         }
-        test! {
+        single_path_test! {
             simple_key_without_dollar,
             "simple_key_without_dollar",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["c"]),
+            "c",
             [4, 5, { "f": 7 }]
         }
-        test! {
+        single_path_test! {
             array_index,
             "array_index",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["$.c[2]"]),
+            "$.c[2]",
             { "f": 7 }
         }
-        test! {
+        single_path_test! {
             array_index_with_key,
             "array_index_with_key",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["$.c[2].f"]),
+            "$.c[2].f",
             7
         }
-        test! {
+        single_path_test! {
             last_array_index,
             "last_array_index",
             { "a": 2, "c": [4, 5], "f": 7 },
-            Some(&["$.c[#-1]"]),
+            "$.c[#-1]",
             5
         }
-        test! {
+        single_path_test! {
             bool,
             "bool",
             [false, false, false, true],
-            Some(&["3"]),
+            "3",
             true
         }
-        test! {
+        single_path_test! {
             number,
             "number",
             [11, 22, 33, 44],
-            Some(&["3"]),
+            "3",
             44
         }
-        test! {
+        single_path_test! {
             string,
             "string",
             { "a": "xyz" },
-            Some(&["$.a"]),
+            "$.a",
             "xyz"
         }
-        test! {
+        single_path_test! {
             null,
             "null",
             { "a": null },
-            Some(&["$.a"]),
+            "$.a",
             null
         }
     }
@@ -116,81 +126,87 @@ mod gets_the_value {
     mod multiple_paths {
         use super::*;
 
-        test! {
-            roots,
+        macro_rules! multiple_paths_test {
+            ($name:ident, $key:expr, $initial:tt, $paths:expr, $want:tt) => {
+                test!($name, $key, $initial, Some(&$paths), $want);
+            };
+        }
+
+        multiple_paths_test! {
+            multiple_roots,
             "multiple_roots",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["$", "$"]),
+            ["$", "$"],
             { "$": { "a": 2, "c": [4, 5, { "f": 7 }] } }
         }
-        test! {
+        multiple_paths_test! {
             simple_keys,
             "simple_keys",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["$.a", "$.c"]),
+            ["$.a", "$.c"],
             { "$.a": 2, "$.c": [4, 5, { "f": 7 }] }
         }
-        test! {
+        multiple_paths_test! {
             simple_keys_without_dollar,
             "simple_keys_without_dollar",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["a", "c"]),
+            ["a", "c"],
             { "a": 2, "c": [4, 5, { "f": 7 }] }
         }
-        test! {
+        multiple_paths_test! {
             simple_keys_with_and_without_dollar,
             "simple_keys_with_and_without_dollar",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["$.a", "a", "c"]),
+            ["$.a", "a", "c"],
             { "$.a": 2, "a": 2, "c": [4, 5, { "f": 7 }] }
         }
-        test! {
+        multiple_paths_test! {
             array_indexes,
             "array_indexes",
             { "a": 2, "c": [4, 5, { "f": 7 }] },
-            Some(&["$.c[1]", "$.c[2]"]),
+            ["$.c[1]", "$.c[2]"],
             { "$.c[1]": 5, "$.c[2]": { "f": 7 } }
         }
-        test! {
+        multiple_paths_test! {
             array_indexes_with_key,
             "array_indexes_with_key",
             { "a": 2, "c": [4, { "b": 5 }, { "f": 7 }] },
-            Some(&["$.c[1].b", "$.c[2].f"]),
+            ["$.c[1].b", "$.c[2].f"],
             { "$.c[1].b": 5, "$.c[2].f": 7 }
         }
-        test! {
+        multiple_paths_test! {
             last_array_indexes,
             "last_array_indexes",
             { "a": 2, "c": [4, 5], "f": 7 },
-            Some(&["$.c[#-2]", "$.c[#-1]"]),
+            ["$.c[#-2]", "$.c[#-1]"],
             { "$.c[#-2]": 4, "$.c[#-1]": 5 }
         }
-        test! {
+        multiple_paths_test! {
             bools,
             "bools",
             [false, false, false, true],
-            Some(&["2", "3"]),
+            ["2", "3"],
             { "2": false, "3": true }
         }
-        test! {
+        multiple_paths_test! {
             numbers,
             "numbers",
             [11, 22, 33, 44],
-            Some(&["2", "3"]),
+            ["2", "3"],
             { "2": 33, "3": 44 }
         }
-        test! {
+        multiple_paths_test! {
             strings,
             "strings",
             { "a": "xyz", "b": "abc" },
-            Some(&["$.a", "$.b"]),
+            ["$.a", "$.b"],
             { "$.a": "xyz", "$.b": "abc" }
         }
-        test! {
+        multiple_paths_test! {
             nulls,
             "nulls",
             { "a": null, "b": null },
-            Some(&["$.a", "$.b"]),
+            ["$.a", "$.b"],
             { "$.a": null, "$.b": null }
         }
     }
