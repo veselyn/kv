@@ -194,6 +194,86 @@ mod gets_the_value {
             { "$.a": null, "$.b": null }
         }
     }
+
+    mod fail {
+        use super::*;
+
+        macro_rules! test {
+            ($name:ident, $key:expr, $value:expr, $paths:expr, $want:pat $(if $guard:expr)?) => {
+                #[async_std::test]
+                async fn $name() -> Result<()> {
+                    let service = Service::default();
+                    let key = $key;
+                    let value: Option<String> = $value;
+                    let paths: Option<&[&str]> = $paths;
+
+                    match value {
+                        Some(value) => {
+                            service.set(key, None, value).await?;
+                        }
+                        None => {}
+                    }
+
+                    let result = service.get(key, paths).await;
+                    dbg!(&result);
+
+                    assert!(matches!(result, $want $(if $guard)?));
+
+                    Ok(())
+                }
+            };
+        }
+
+        test! {
+            key_not_found_without_path,
+            "key_not_found_without_path",
+            None,
+            None,
+            Err(GetError::KeyNotFound(key)) if key == "key_not_found_without_path"
+        }
+        test! {
+            key_not_found_with_root_path,
+            "key_not_found_with_root_path",
+            None,
+            Some(&["$"]),
+            Err(GetError::KeyNotFound(key)) if key == "key_not_found_with_root_path"
+        }
+        test! {
+            key_not_found_with_specific_path,
+            "key_not_found_with_specific_path",
+            None,
+            Some(&["$.key"]),
+            Err(GetError::KeyNotFound(key)) if key == "key_not_found_with_specific_path"
+        }
+        test! {
+            paths_not_found_single,
+            "paths_not_found_single",
+            Some(json!({}).to_string()),
+            Some(&["$.key"]),
+            Err(GetError::PathsNotFound(paths)) if paths == ["$.key"]
+        }
+        test! {
+            paths_not_found_multiple_without_match,
+            "paths_not_found_multiple_without_match",
+            Some(json!({}).to_string()),
+            Some(&["$.key1", "$.key2", "$.key3"]),
+            Err(GetError::PathsNotFound(paths)) if paths == ["$.key1", "$.key2", "$.key3"]
+        }
+        test! {
+            paths_not_found_multiple_with_match,
+            "paths_not_found_multiple_with_match",
+            Some(json!({ "key1": "value1" }).to_string()),
+            Some(&["$.key1", "$.key2", "$.key3"]),
+            Err(GetError::PathsNotFound(paths)) if paths == ["$.key2", "$.key3"]
+        }
+        test! {
+            paths_not_found_multiple_with_repetition,
+            "paths_not_found_multiple_with_repetition",
+            Some(json!({ "key1": "value1" }).to_string()),
+            Some(&["$.key1", "$.key2", "$.key2"]),
+            Err(GetError::PathsNotFound(paths)) if paths == ["$.key2"]
+        }
+    }
 }
 
 mod sets_the_value {
