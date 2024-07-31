@@ -1432,6 +1432,7 @@ dependencies = [
  "dirs",
  "entity",
  "env_logger",
+ "indexmap",
  "jq-sys",
  "libc",
  "log",
