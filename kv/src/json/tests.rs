@@ -475,6 +475,14 @@ mod sets_the_value {
                 "[97, 96]",
                 { "a": 2, "c": "[97, 96]" }
             }
+            specific_test! {
+                non_existing_nested_path,
+                "non_existing_nested_path",
+                {},
+                "$.nested.key",
+                "value",
+                { "nested": { "key": "value" } }
+            }
         }
     }
 
