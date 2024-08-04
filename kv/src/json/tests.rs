@@ -35,11 +35,12 @@ mod gets_the_value {
             };
         }
 
-        without_path_test! {
-            without_path,
-            "without_path",
-            { "a": 2, "c": [4, 5, { "f": 7 }] }
-        }
+        without_path_test!(null, "null", null);
+        without_path_test!(bool, "bool", false);
+        without_path_test!(number, "number", 0);
+        without_path_test!(string, "string", "");
+        without_path_test!(array, "array", []);
+        without_path_test!(object, "object", {});
     }
 
     mod single_path {
@@ -318,121 +319,41 @@ mod sets_the_value {
             };
         }
 
-        test! {
-            null,
-            "key",
-            null
-        }
-        test! {
-            bool_false,
-            "   key   ",
-            false
-        }
-        test! {
-            bool_true,
-            "camelCaseKey",
-            true
-        }
-        test! {
-            integer_negative,
-            "PascalCaseKey",
-            (-1)
-        }
-        test! {
-            integer_negative_zero,
-            "snake_case_key",
-            (-0)
-        }
-        test! {
-            integer_zero,
-            "SNAKE_UPPERCASE_KEY",
-            0
-        }
-        test! {
-            integer_positive,
-            "kebab-case-key",
-            1
-        }
-        test! {
-            float_negative,
-            "dot.case.key",
-            (-1.0)
-        }
-        test! {
-            float_negative_zero,
-            "float_negative_zero",
-            (-0.0)
-        }
-        test! {
-            float_zero,
-            "float_zero",
-            0.0
-        }
-        test! {
-            float_positive,
-            "float_positive",
-            1.0
-        }
-        test! {
-            string_empty,
-            "string_empty",
-            ""
-        }
-        test! {
-            string_normal,
-            "key",
-            "value"
-        }
-        test! {
-            string_space,
-            "key space",
-            "value space"
-        }
-        test! {
-            string_tab,
-            "key\ttab",
-            "value\ttab"
-        }
-        test! {
-            string_newline,
-            "key\nnewline",
-            "value\nnewline"
-        }
-        test! {
-            array_empty,
-            "array_empty",
-            []
-        }
-        test! {
-            array_one_element,
-            "array_one_element",
-            ["value"]
-        }
-        test! {
+        test!(null, "key", null);
+        test!(bool_false, "   key   ", false);
+        test!(bool_true, "camelCaseKey", true);
+        test!(integer_negative, "PascalCaseKey", (-1));
+        test!(integer_negative_zero, "snake_case_key", (-0));
+        test!(integer_zero, "SNAKE_UPPERCASE_KEY", 0);
+        test!(integer_positive, "kebab-case-key", 1);
+        test!(float_negative, "dot.case.key", (-1.0));
+        test!(float_negative_zero, "float_negative_zero", (-0.0));
+        test!(float_zero, "float_zero", 0.0);
+        test!(float_positive, "float_positive", 1.0);
+        test!(string_empty, "string_empty", "");
+        test!(string_normal, "key", "value");
+        test!(string_space, "key space", "value space");
+        test!(string_tab, "key\ttab", "value\ttab");
+        test!(string_newline, "key\nnewline", "value\nnewline");
+        test!(array_empty, "array_empty", []);
+        test!(array_one_element, "array_one_element", ["value"]);
+        test!(
             array_multiple_elements,
             "array_multiple_elements",
             ["value1", "value2", "value3"]
-        }
-        test! {
-            object_empty,
-            "object_empty",
-            {}
-        }
-        test! {
-            object_one_key,
-            "object_one_key",
-            { "key": "value" }
-        }
-        test! {
-            object_multiple_keys,
-            "object_multiple_keys",
-            { "key1": "value1", "key2": "value2", "key3": "value3" }
-        }
-        test! {
+        );
+        test!(object_empty, "object_empty", {});
+        test!(object_one_key, "object_one_key", { "key": "value" });
+        test!(object_multiple_keys, "object_multiple_keys", { "key1": "value1", "key2": "value2", "key3": "value3" });
+        test!(
             replaces_value,
             "key",
-            "value1", "key", "value2", "key", "value3"
-        }
+            "value1",
+            "key",
+            "value2",
+            "key",
+            "value3"
+        );
     }
 
     mod with_path {
@@ -469,116 +390,32 @@ mod sets_the_value {
                 };
             }
 
-            root_test! {
-                null,
-                "key",
-                null
-            }
-            root_test! {
-                bool_false,
-                "   key   ",
-                false
-            }
-            root_test! {
-                bool_true,
-                "camelCaseKey",
-                true
-            }
-            root_test! {
-                integer_negative,
-                "PascalCaseKey",
-                (-1)
-            }
-            root_test! {
-                integer_negative_zero,
-                "snake_case_key",
-                (-0)
-            }
-            root_test! {
-                integer_zero,
-                "SNAKE_UPPERCASE_KEY",
-                0
-            }
-            root_test! {
-                integer_positive,
-                "kebab-case-key",
-                1
-            }
-            root_test! {
-                float_negative,
-                "dot.case.key",
-                (-1.0)
-            }
-            root_test! {
-                float_negative_zero,
-                "float_negative_zero",
-                (-0.0)
-            }
-            root_test! {
-                float_zero,
-                "float_zero",
-                0.0
-            }
-            root_test! {
-                float_positive,
-                "float_positive",
-                1.0
-            }
-            root_test! {
-                string_empty,
-                "string_empty",
-                ""
-            }
-            root_test! {
-                string_normal,
-                "key",
-                "value"
-            }
-            root_test! {
-                string_space,
-                "key space",
-                "value space"
-            }
-            root_test! {
-                string_tab,
-                "key\ttab",
-                "value\ttab"
-            }
-            root_test! {
-                string_newline,
-                "key\nnewline",
-                "value\nnewline"
-            }
-            root_test! {
-                array_empty,
-                "array_empty",
-                []
-            }
-            root_test! {
-                array_one_element,
-                "array_one_element",
-                ["value"]
-            }
-            root_test! {
+            root_test!(null, "key", null);
+            root_test!(bool_false, "   key   ", false);
+            root_test!(bool_true, "camelCaseKey", true);
+            root_test!(integer_negative, "PascalCaseKey", (-1));
+            root_test!(integer_negative_zero, "snake_case_key", (-0));
+            root_test!(integer_zero, "SNAKE_UPPERCASE_KEY", 0);
+            root_test!(integer_positive, "kebab-case-key", 1);
+            root_test!(float_negative, "dot.case.key", (-1.0));
+            root_test!(float_negative_zero, "float_negative_zero", (-0.0));
+            root_test!(float_zero, "float_zero", 0.0);
+            root_test!(float_positive, "float_positive", 1.0);
+            root_test!(string_empty, "string_empty", "");
+            root_test!(string_normal, "key", "value");
+            root_test!(string_space, "key space", "value space");
+            root_test!(string_tab, "key\ttab", "value\ttab");
+            root_test!(string_newline, "key\nnewline", "value\nnewline");
+            root_test!(array_empty, "array_empty", []);
+            root_test!(array_one_element, "array_one_element", ["value"]);
+            root_test!(
                 array_multiple_elements,
-                "array_multiple_elements", ["value1",
-                "value2", "value3"]
-            }
-            root_test! {
-                object_empty,
-                "object_empty",
-                {}
-            }
-            root_test! {
-                object_one_key,
-                "object_one_key",
-                { "key": "value" }
-            }
-            root_test! {
-                object_multiple_keys,
-                "object_multiple_keys", { "key1": "value1",
-                "key2": "value2", "key3": "value3" }
-            }
+                "array_multiple_elements",
+                ["value1", "value2", "value3"]
+            );
+            root_test!(object_empty, "object_empty", {});
+            root_test!(object_one_key, "object_one_key", { "key": "value" });
+            root_test!(object_multiple_keys, "object_multiple_keys", { "key1": "value1", "key2": "value2", "key3": "value3" });
         }
 
         mod specific {
@@ -590,22 +427,22 @@ mod sets_the_value {
                 };
             }
 
-            specific_test!(
+            specific_test! {
                 last_array_index,
                 "last_array_index",
                 [1, 2, 3, 4],
                 "$[#]",
                 99,
                 [1, 2, 3, 4, 99]
-            );
-            specific_test!(
+            }
+            specific_test! {
                 nested_last_array_index,
                 "nested_last_array_index",
                 [1, [2, 3], 4],
                 "$[1][#]",
                 99,
                 [1, [2, 3, 99], 4]
-            );
+            }
             specific_test! {
                 replaces_value,
                 "replaces_value",
@@ -678,6 +515,247 @@ mod sets_the_value {
             None,
             "invalid",
             Err(SetError::InvalidJson(_))
+        }
+    }
+}
+
+mod deletes_the_value {
+    use super::*;
+
+    mod without_path {
+        use super::*;
+
+        macro_rules! test {
+            ($name:ident, $key:expr, $initial:tt) => {
+                #[async_std::test]
+                async fn $name() -> Result<()> {
+                    let service = Service::default();
+                    let key = $key;
+                    let initial = json!($initial).to_string();
+                    service.set(key, None, initial).await?;
+
+                    let result = service.del(key, None).await;
+
+                    self::assert_eq!(Ok(()), result);
+
+                    Ok(())
+                }
+            };
+        }
+
+        test!(null, "null", null);
+        test!(bool, "bool", false);
+        test!(number, "number", 0);
+        test!(string, "string", "");
+        test!(array, "array", []);
+        test!(object, "object", {});
+    }
+
+    mod with_path {
+        use super::*;
+
+        macro_rules! test {
+            ($name:ident, $key:expr, $initial:tt, $path:expr, None) => {
+                test!(
+                    $name,
+                    $key,
+                    $initial,
+                    $path,
+                    Err(GetError::KeyNotFound($key.to_owned()))
+                );
+            };
+            ($name:ident, $key:expr, $initial:tt, $path:expr, $want:tt) => {
+                test!($name, $key, $initial, $path, Ok(json!($want).to_string()));
+            };
+            ($name:ident, $key:expr, $initial:tt, $path:expr, $want:expr) => {
+                #[async_std::test]
+                async fn $name() -> Result<()> {
+                    let service = Service::default();
+                    let key = $key;
+                    let path = Some($path);
+                    let initial = json!($initial).to_string();
+                    let want = $want;
+                    service.set(key, None, initial).await?;
+
+                    let result = service.del(key, path).await;
+
+                    self::assert_eq!(Ok(()), result);
+                    self::assert_eq!(want, service.get(key, None).await);
+
+                    Ok(())
+                }
+            };
+        }
+
+        test! {
+            array_index_middle,
+            "array_index_middle",
+            [0, 1, 2, 3, 4],
+            "$[2]",
+            [0, 1, 3, 4]
+        }
+        test! {
+            array_index_start,
+            "array_index_start",
+            [0, 1, 2, 3, 4],
+            "$[0]",
+            [1, 2, 3, 4]
+        }
+        test! {
+            array_index_end,
+            "array_index_end",
+            [0, 1, 2, 3, 4],
+            "$[#-1]",
+            [0, 1, 2, 3]
+        }
+        test! {
+            specific_path,
+            "specific_path",
+            { "x": 25, "y": 42 },
+            "$.y",
+            { "x": 25 }
+        }
+        test! {
+            root,
+            "root",
+            { "x": 25, "y": 42 },
+            "$",
+            None
+        }
+    }
+
+    mod fail {
+        use super::*;
+
+        macro_rules! test {
+            ($name:ident, $key:expr, $path:expr, $want:expr) => {
+                test!($name, $key, None::<String>, $path, $want);
+            };
+            ($name:ident, $key:expr, $initial:tt, $path:expr, $want:expr) => {
+                test!($name, $key, Some(json!($initial).to_string()), $path, $want);
+            };
+            ($name:ident, $key:expr, $initial:expr, $path:expr, $want:expr) => {
+                #[async_std::test]
+                async fn $name() -> Result<()> {
+                    let service = Service::default();
+                    let key = $key;
+                    let path: Option<&str> = $path;
+                    let initial: Option<String> = $initial;
+                    let want: DelError = $want;
+                    if let Some(initial) = initial {
+                        service.set(key, None, initial).await?;
+                    }
+
+                    let result = service.del(key, path).await;
+
+                    self::assert_eq!(Err(want), result);
+
+                    Ok(())
+                }
+            };
+        }
+
+        test! {
+            key_not_found_without_path,
+            "key_not_found_without_path",
+            None,
+            DelError::KeyNotFound("key_not_found_without_path".to_owned())
+        }
+        test! {
+            key_not_found_with_root_path,
+            "key_not_found_with_root_path",
+            Some("$"),
+            DelError::KeyNotFound("key_not_found_with_root_path".to_owned())
+        }
+        test! {
+            key_not_found_with_specific_path,
+            "key_not_found_with_specific_path",
+            Some("$.key"),
+            DelError::KeyNotFound("key_not_found_with_specific_path".to_owned())
+        }
+        test! {
+            path_not_found_null_at_index,
+            "path_not_found_null_at_index",
+            null,
+            Some("$[0]"),
+            DelError::PathNotFound("$[0]".to_owned())
+        }
+        test! {
+            path_not_found_null_at_key,
+            "path_not_found_null_at_key",
+            null,
+            Some("$.key"),
+            DelError::PathNotFound("$.key".to_owned())
+        }
+        test! {
+            path_not_found_bool_at_index,
+            "path_not_found_bool_at_index",
+            false,
+            Some("$[0]"),
+            DelError::PathNotFound("$[0]".to_owned())
+        }
+        test! {
+            path_not_found_bool_at_key,
+            "path_not_found_bool_at_key",
+            false,
+            Some("$.key"),
+            DelError::PathNotFound("$.key".to_owned())
+        }
+        test! {
+            path_not_found_number_at_index,
+            "path_not_found_number_at_index",
+            0,
+            Some("$[0]"),
+            DelError::PathNotFound("$[0]".to_owned())
+        }
+        test! {
+            path_not_found_number_at_key,
+            "path_not_found_number_at_key",
+            0,
+            Some("$.key"),
+            DelError::PathNotFound("$.key".to_owned())
+        }
+        test! {
+            path_not_found_string_at_index,
+            "path_not_found_string_at_index",
+            "value",
+            Some("$[0]"),
+            DelError::PathNotFound("$[0]".to_owned())
+        }
+        test! {
+            path_not_found_string_at_key,
+            "path_not_found_string_at_key",
+            "value",
+            Some("$.key"),
+            DelError::PathNotFound("$.key".to_owned())
+        }
+        test! {
+            path_not_found_array_at_index,
+            "path_not_found_array_at_index",
+            [],
+            Some("$[0]"),
+            DelError::PathNotFound("$[0]".to_owned())
+        }
+        test! {
+            path_not_found_array_at_key,
+            "path_not_found_array_at_key",
+            [],
+            Some("$.key"),
+            DelError::PathNotFound("$.key".to_owned())
+        }
+        test! {
+            path_not_found_object_at_index,
+            "path_not_found_object_at_index",
+            {},
+            Some("$[0]"),
+            DelError::PathNotFound("$[0]".to_owned())
+        }
+        test! {
+            path_not_found_object_at_key,
+            "path_not_found_object_at_key",
+            {},
+            Some("$.key"),
+            DelError::PathNotFound("$.key".to_owned())
         }
     }
 }
